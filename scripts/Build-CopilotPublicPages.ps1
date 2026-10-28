@@ -1,0 +1,100 @@
+#requires -Version 7.5
+<#
+.SYNOPSIS
+公開済み契約の実測exportと独立合成デモを、明確な2入口に配置します。
+.DESCRIPTION
+固定SHA256で承認された公開用payloadだけを読み、private原本には接続しません。
+#>
+[CmdletBinding()]
+param([Parameter(Mandatory)][string]$OutputDirectory)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+$pocRoot = Split-Path $PSScriptRoot -Parent
+$node = (Get-Command node -ErrorAction Stop).Source
+$payloadPath = Join-Path $pocRoot 'tests\fixtures\public-measured-monthly.json'
+$raw = (Get-Content -LiteralPath $payloadPath -Raw -Encoding utf8).TrimStart([char]0xFEFF).Replace("`r`n", "`n")
+$digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($raw))).ToLowerInvariant()
+if ($digest -cne '17b7e9a8f912d8967b502beb83f9c0b35518b92a6db7710037616a69c0a7d293') {
+    throw 'Measured public payload differs from the reviewed export.'
+}
+& $node (Join-Path $pocRoot 'scripts\Validate-CopilotPublicPayload.cjs') $payloadPath
+if ($LASTEXITCODE -ne 0) { throw 'Measured public contract failed.' }
+$output = [IO.Path]::GetFullPath($OutputDirectory)
+$synthetic = & (Join-Path $PSScriptRoot 'Build-CopilotSyntheticPages.ps1') -OutputDirectory $output
+$measured = & (Join-Path $PSScriptRoot 'Export-CopilotMonthlyDashboard.ps1') `
+    -PayloadPath $payloadPath -OutputPath (Join-Path $output 'measured-monthly.html') -DataClass tenant -ShowObservedCounts
+$utf8 = [Text.UTF8Encoding]::new($false)
+[IO.File]::WriteAllText((Join-Path $output 'measured-monthly.json'), $raw, $utf8)
+$nav = '<nav aria-label="公開デモの切替" style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><a style="color:var(--cp-link)" href="index.html">デモ一覧 / Demo home</a> | <a style="color:var(--cp-link)" href="measured-monthly.html">Diamond実測 / Measured demo environment</a> | <a style="color:var(--cp-link)" href="synthetic-monthly.html">完全合成 / Fully synthetic</a></nav>'
+$notice = '<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>Diamondデモ環境の実測値（アカウント・部門名は公開用表記）</strong><p>これはactionsでありpromptsではありません。当月不完全のため確定回数は不明です。unknownはzeroではなく、不明を0に置き換えていません。観測回数は参考値であり、少利用判定には使用しません。</p><p>Measured values from the Diamond demo environment; account and department names use public-only labels. Actions are not prompts. The current month is incomplete; unknown is not zero. Observed counts are reference only, never confirmed low usage.</p></aside>'
+$measuredPath = Join-Path $output 'measured-monthly.html'
+$html = Get-Content -LiteralPath $measuredPath -Raw -Encoding utf8
+$initialView = '<script>(() => { const view = document.querySelector(''select[id$="-view"]''); if (view) { view.value = "unknown"; view.dispatchEvent(new Event("change", { bubbles: true })); } })();</script>'
+$html = $html.Replace('<main id="dashboard">', "$nav$notice<main id=`"dashboard`">").Replace('</body>', "$initialView</body>")
+[IO.File]::WriteAllText($measuredPath, $html, $utf8)
+$syntheticPath = Join-Path $output 'synthetic-monthly.html'
+$html = Get-Content -LiteralPath $syntheticPath -Raw -Encoding utf8
+$html = [regex]::Replace($html, '<nav aria-label="合成デモの表示切替".*?</nav>', '', [Text.RegularExpressions.RegexOptions]::Singleline)
+$syntheticNotice = '<aside style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>完全合成データ・実績ではありません / Fully synthetic, not actual usage</strong></aside>'
+[IO.File]::WriteAllText($syntheticPath, $html.Replace('<main id="dashboard">', "$nav$syntheticNotice<main id=`"dashboard`">"), $utf8)
+$indexPath = Join-Path $output 'index.html'
+$periodPath = Join-Path $output 'reporting-period.html'
+$periodHtml = (Get-Content -LiteralPath $indexPath -Raw -Encoding utf8).Replace('href="index.html">従来の期間集計', 'href="reporting-period.html">従来の期間集計')
+[IO.File]::WriteAllText($periodPath, $periodHtml, $utf8)
+$css = Get-Content -LiteralPath (Join-Path $pocRoot 'monthly-ui\dashboard.css') -Raw -Encoding utf8
+$landing = @"
+<!doctype html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Copilot 利用状況・公開デモ</title>
+<script>
+(() => {
+  const param = new URLSearchParams(window.location.search).get("scoutTheme");
+  const theme = param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+</script>
+<style>$css
+body { margin:0; background:var(--cp-bg); color:var(--cp-text); }
+a { color:var(--cp-link); }
+main { max-width:76rem; margin:auto; }
+</style></head>
+<body><main class="cp-monthly">
+<h1>Copilot 利用状況・公開デモ / Public usage demos</h1>
+<p>実測値と合成データを別画面で表示します。 / Measured and synthetic data are separate demos.</p>
+<div class="cp-results">
+<article><h2><a href="measured-monthly.html">1. Diamondデモ環境の実測値</a></h2>
+<p>アカウント・部門名は公開用表記です。actionsでありpromptsではありません。当月不完全・unknownはzeroではありません。</p>
+<p>Measured demo-environment actions. Public-only identity labels. Incomplete month: unknown is not zero.</p>
+<p>「不明・欠測」または「全件」と「観測回数（参考）を表示」で、実取得の状態を確認できます。</p></article>
+<article><h2><a href="synthetic-monthly.html">2. 完全合成・月次しきい値デモ</a></h2>
+<p>完全合成データ・実績ではありません。日本語／English、5・10・15・30未満／任意整数、部門、不明の挙動を確認できます。</p>
+<p>Fully synthetic, not actual usage. Demonstrates language switching, strict thresholds, department filters and unknown values.</p></article>
+</div>
+<p><a href="reporting-period.html">従来の期間集計（完全合成） / Reporting-period summary (synthetic)</a></p>
+<p>公開ページに秘密・元アカウントID・元UPN・元氏名・元部署名・管理ID・内部URLは含めません。配布後の公開データは匿名閲覧・再配布が可能です。</p>
+</main></body></html>
+"@
+[IO.File]::WriteAllText($indexPath, $landing, $utf8)
+$manifestPath = Join-Path $output 'manifest.json'
+$manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable -DateKind String
+$manifest.dataClass = 'mixed-explicitly-separated'
+$manifest.publicMeasuredExport = [ordered]@{
+    dataClass = 'tenant'; publicPayloadSha256 = $digest
+    htmlSha256 = (Get-FileHash -LiteralPath $measuredPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    identityPolicy = 'Public-only sequential account and department labels; no original mapping or source hash is published'
+    metric = 'actions-not-prompts'; unknownIsZero = $false
+}
+$manifest.monthlyFixture.htmlSha256 = (Get-FileHash -LiteralPath $syntheticPath -Algorithm SHA256).Hash.ToLowerInvariant()
+$manifest.files = @(Get-ChildItem -LiteralPath $output -File -Recurse | Where-Object { $_.FullName -ne $manifestPath } |
+    Sort-Object FullName | ForEach-Object {
+        [ordered]@{ path = [IO.Path]::GetRelativePath($output, $_.FullName).Replace('\', '/')
+            sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() }
+    })
+[IO.File]::WriteAllText($manifestPath, (($manifest | ConvertTo-Json -Depth 30) + "`n"), $utf8)
+[pscustomobject]@{
+    Status = 'success'; DistributionAllowed = $true; Entrances = @('measured-monthly.html', 'synthetic-monthly.html')
+    MeasuredPayloadSha256 = $digest
+    MeasuredHtmlSha256 = $manifest.publicMeasuredExport.htmlSha256
+    SyntheticHtmlSha256 = $manifest.monthlyFixture.htmlSha256
+    IndexSha256 = (Get-FileHash -LiteralPath $indexPath -Algorithm SHA256).Hash.ToLowerInvariant()
+}

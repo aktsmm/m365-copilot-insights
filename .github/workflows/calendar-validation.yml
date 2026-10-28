@@ -1,0 +1,30 @@
+name: Private calendar collection
+on:
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: copilot-private-publication
+  cancel-in-progress: false
+jobs:
+  collect:
+    if: github.repository == 'aktsmm/m365-copilot-insights' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      TENANT_ID: ${{ vars.TENANT_ID }}
+      COLLECTOR_CLIENT_ID: ${{ vars.COLLECTOR_CLIENT_ID }}
+      PUBLISHER_CLIENT_ID: ${{ vars.PUBLISHER_CLIENT_ID }}
+      SPO_SITE_ID: ${{ vars.SPO_SITE_ID }}
+      SPO_LIBRARY_ID: ${{ vars.SPO_LIBRARY_ID }}
+      SPO_SITE_PATH: ${{ vars.SPO_SITE_PATH }}
+      SPO_OWNERSHIP_MARKER: ${{ vars.SPO_OWNERSHIP_MARKER }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Run private processing with bounded public status
+        shell: pwsh
+        run: ./scripts/Invoke-CopilotPrivateRun.ps1 -Mode calendar

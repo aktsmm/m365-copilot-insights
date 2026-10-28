@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-ja="実テナント取得元の全体観測" data-en="Live tenant source observation">実テナント取得元の全体観測</title>
+{{THEME}}
+{{STYLE}}
+</head>
+<body>
+<main>
+<header>
+<div class="heading"><h1 data-ja="実テナント取得元の全体観測" data-en="Live tenant source observation">実テナント取得元の全体観測</h1></div>
+<div class="language-switch" role="group" aria-label="表示言語" data-aria-ja="表示言語" data-aria-en="Display language">
+<button type="button" lang="ja" data-language="ja" aria-pressed="true" aria-label="日本語で表示" data-aria-ja="日本語で表示" data-aria-en="Display in Japanese">日本語</button>
+<button type="button" lang="en" data-language="en" aria-pressed="false" aria-label="英語で表示" data-aria-ja="英語で表示" data-aria-en="Display in English">English</button>
+</div>
+</header>
+<dl class="metrics" aria-label="取得元の主要な観測値" data-aria-ja="取得元の主要な観測値" data-aria-en="Key source observations">{{METRICS}}</dl>
+<p class="notice restricted" data-ja="非公開の取得元全体集計です。部門別配信は未成立・未完了です。部門向けの自動配信は停止中です。" data-en="Private source-only aggregate. Department delivery is not established or complete. Automated delivery to departments is stopped.">非公開の取得元全体集計です。部門別配信は未成立・未完了です。部門向けの自動配信は停止中です。</p>
+<p class="hint" data-ja="この生成画面はM365管理センターの画面ではありません。取得済みcollection-summary.jsonを読み、許可された集計項目だけを表示しています。" data-en="This generated page is not the M365 admin center. It displays only allowlisted aggregate fields from the collected collection-summary.json.">この生成画面はM365管理センターの画面ではありません。取得済みcollection-summary.jsonを読み、許可された集計項目だけを表示しています。</p>
+<section class="card" aria-labelledby="observation-title">
+<h2 id="observation-title" data-ja="取得したレポートの観測値" data-en="Observed source report values">取得したレポートの観測値</h2>
+<div class="table-scroll" role="region" tabindex="0" aria-label="取得元の全体集計" data-aria-ja="取得元の全体集計" data-aria-en="Source aggregate">
+<table><caption data-ja="実取得の全体観測（部門照合とは別工程）" data-en="Source collection observation (separate from department reconciliation)">実取得の全体観測（部門照合とは別工程）</caption><tbody>{{ROWS}}</tbody></table>
+</div>
+</section>
+<section class="card" aria-labelledby="stages-title">
+<h2 id="stages-title" data-ja="工程状態と出典" data-en="Stage status and provenance">工程状態と出典</h2>
+<p data-ja="primary D7：HTTP 200・行数整合を入力内で確認。source-only：全体集計を表示。部門別照合・配信：本画面では未成立・未完了として扱います。" data-en="Primary D7: HTTP 200 and row consistency checked within the input. Source-only: aggregate displayed. Department reconciliation and delivery remain unestablished and incomplete in this view.">primary D7：HTTP 200・行数整合を入力内で確認。source-only：全体集計を表示。部門別照合・配信：本画面では未成立・未完了として扱います。</p>
+<p><a href="{{RUNURL}}" rel="noreferrer" data-ja="非公開GitHub Actions実行の証跡を開く" data-en="Open the private GitHub Actions run evidence">非公開GitHub Actions実行の証跡を開く</a></p>
+</section>
+<footer>
+<p data-ja="0件と不明は別です。既知の合計は不明な行を除いた値で、全件が不明なら「不明」と表示します。最終利用日や利用日数を送信回数として扱いません。" data-en="Zero and unknown are distinct. The known sum excludes unknown rows; all-unknown input displays Unknown. Activity dates and active days are not prompt counts.">0件と不明は別です。既知の合計は不明な行を除いた値で、全件が不明なら「不明」と表示します。最終利用日や利用日数を送信回数として扱いません。</p>
+<p data-ja="この画面単体では取得元を独立検証しません。取得・テナント照合の実行証跡はリンク先の収集ジョブを参照してください。部門別配信・SPO成功の証明ではありません。部門別strict試験は引き続き必須です。" data-en="This page alone does not independently verify the source. Refer to the linked collection job for collection and tenant-verification execution evidence. This page does not prove department delivery or SPO success. The strict department test remains mandatory.">この画面単体では取得元を独立検証しません。取得・テナント照合の実行証跡はリンク先の収集ジョブを参照してください。部門別配信・SPO成功の証明ではありません。部門別strict試験は引き続き必須です。</p>
+<noscript><p>JavaScriptが無効なため言語切替は使えません。日本語の観測値はそのまま閲覧できます。</p></noscript>
+</footer>
+</main>
+{{LANGUAGE}}
+</body>
+</html>

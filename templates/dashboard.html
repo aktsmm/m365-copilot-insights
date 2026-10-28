@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-ja="Microsoft 365 Copilot 利用状況" data-en="Microsoft 365 Copilot usage">Microsoft 365 Copilot 利用状況</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 16px/1.5 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+body { overflow-wrap: anywhere; }
+main { width: 100%; max-width: 1440px; min-width: 0; margin: 24px auto; padding: 24px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.heading { flex: 1 1 320px; min-width: 0; }
+h1 { margin: 8px 0 16px; font-size: clamp(24px, 4vw, 32px); line-height: 1.4; }
+h2 { font-size: 20px; margin: 0 0 12px; }
+p { margin: 12px 0; }
+.eyebrow { color: var(--cp-accent); font-weight: 700; margin: 0; }
+.language-switch { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+button { font: inherit; min-height: 44px; padding: 8px 12px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem; background: var(--cp-surface); color: var(--cp-text); cursor: pointer; }
+button[aria-pressed="true"] { border-color: var(--cp-accent); background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 700; }
+button:hover { border-color: var(--cp-accent); }
+:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 4px; }
+.skip-link { display: inline-block; padding: 8px; color: var(--cp-link); }
+.notice { padding: 16px; border: 1px solid var(--cp-border); border-left: 4px solid var(--cp-accent); border-radius: 0.625rem; background: var(--cp-accent-soft); }
+.synthetic, .restricted { color: var(--cp-text); font-weight: 700; }
+.synthetic { border: 2px solid var(--cp-accent); }
+.department { font-size: 20px; }
+.build-status, .data-class, .hint { color: var(--cp-text-muted); }
+.source { padding: 12px 16px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface); font-size: 14px; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; margin: 24px 0 12px; }
+.metric { min-width: 0; padding: 20px; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); }
+dt { color: var(--cp-text-muted); }
+dd { margin: 8px 0 0; font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.card { min-width: 0; margin-top: 24px; padding: 20px; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); }
+.table-scroll { width: 100%; max-width: 100%; overflow-x: auto; border: 1px solid var(--cp-border); border-radius: 0.625rem; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+caption { text-align: left; padding: 12px; font-weight: 700; }
+th, td { padding: 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--cp-border); overflow-wrap: anywhere; min-width: 160px; max-width: 320px; }
+th { background: var(--cp-surface-soft); color: var(--cp-text); }
+tbody tr:nth-child(even) { background: var(--cp-surface-soft); }
+footer { margin-top: 24px; color: var(--cp-text-muted); font-size: 14px; }
+footer li { margin: 8px 0; }
+@media (max-width: 600px) {
+  main { margin: 0 auto; padding: 16px; }
+  .card { padding: 12px; }
+  .metrics { gap: 12px; }
+  .metric { padding: 16px; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#usage" data-ja="利用状況の表へ移動" data-en="Skip to usage table">利用状況の表へ移動</a>
+<main>
+<header>
+<div class="heading">
+<p class="eyebrow">{{VIEW}}</p>
+<h1 data-ja="Microsoft 365 Copilot 利用状況" data-en="Microsoft 365 Copilot usage">Microsoft 365 Copilot 利用状況</h1>
+</div>
+<div class="language-switch" role="group" aria-label="表示言語" data-aria-ja="表示言語" data-aria-en="Display language">
+<span data-ja="表示言語" data-en="Language">表示言語</span>
+<button type="button" lang="ja" data-language="ja" aria-pressed="true" aria-label="日本語で表示" data-aria-ja="日本語で表示" data-aria-en="Display in Japanese">日本語</button>
+<button type="button" lang="en" data-language="en" aria-pressed="false" aria-label="英語で表示" data-aria-ja="英語で表示" data-aria-en="Display in English">English</button>
+</div>
+</header>
+{{BANNER}}
+{{SCOPE}}
+{{STATE}}
+{{SOURCE}}
+<dl class="metrics" aria-label="このページの集計" data-aria-ja="このページの集計" data-aria-en="Metrics for this view">{{METRICS}}</dl>
+<p class="hint" data-ja="取得済みの合計には、不明なユーザーのプロンプト数を含みません。不明は0件ではありません。" data-en="The known sum excludes users with unknown counts. Unknown does not mean zero.">取得済みの合計には、不明なユーザーのプロンプト数を含みません。不明は0件ではありません。</p>
+{{QUARANTINE}}
+<section class="card" id="usage" tabindex="-1" aria-labelledby="usage-heading">
+<h2 id="usage-heading" data-ja="ユーザー別の詳細" data-en="User details">ユーザー別の詳細</h2>
+<p class="hint" id="table-hint" data-ja="表は左右にスクロールできます。キーボードでは表にフォーカスして左右キーで移動できます。" data-en="Scroll the table horizontally. With a keyboard, focus the table region and use the arrow keys.">表は左右にスクロールできます。キーボードでは表にフォーカスして左右キーで移動できます。</p>
+<div class="table-scroll" role="region" tabindex="0" aria-label="ユーザー別の利用状況" data-aria-ja="ユーザー別の利用状況" data-aria-en="Usage by user" aria-describedby="table-hint">{{TABLE}}</div>
+</section>
+<footer aria-labelledby="notes-heading">
+<h2 id="notes-heading" data-ja="データの見方と注意点" data-en="How to read this report">データの見方と注意点</h2>
+<ul>
+<li data-ja="送信プロンプト数は、レポートの集計期間内の値です。最終利用日は利用した日付を示し、利用回数や送信数ではありません。" data-en="Prompt counts apply to the report period. Last activity dates indicate when activity occurred, not frequency or prompt counts.">送信プロンプト数は、レポートの集計期間内の値です。最終利用日は利用した日付を示し、利用回数や送信数ではありません。</li>
+<li data-ja="不明は未取得・空欄などを表し、0件として扱いません。掲載ユーザー数はこのページのレポート行数で、ライセンス保有者数や部門の在籍者総数ではありません。" data-en="Unknown represents missing or empty data, not zero. Users in this view counts report rows, not licensed users or total department headcount.">不明は未取得・空欄などを表し、0件として扱いません。掲載ユーザー数はこのページのレポート行数で、ライセンス保有者数や部門の在籍者総数ではありません。</li>
+<li data-ja="表示言語を切り替えても、部門名・ユーザー名・取得元データは翻訳しません。CSVの列名やデータ形式も変わりません。" data-en="Changing language translates only interface labels, not department names, user names, or source data. CSV headers and formats do not change.">表示言語を切り替えても、部門名・ユーザー名・取得元データは翻訳しません。CSVの列名やデータ形式も変わりません。</li>
+<li data-ja="このHTMLは通信・ストレージを使わない静的レポートです。SharePointへの保存とブラウザー内での対話表示は別の機能です。配信結果・閲覧権限は検証レポートを参照してください。相対ファイルパスとSHA256はmanifest.jsonに記録しています。" data-en="This static report uses no network or storage. Saving to SharePoint and interactive browser display are separate capabilities. See the validation report for delivery results and access permissions. Relative file paths and SHA256 hashes are recorded in manifest.json.">このHTMLは通信・ストレージを使わない静的レポートです。SharePointへの保存とブラウザー内での対話表示は別の機能です。配信結果・閲覧権限は検証レポートを参照してください。相対ファイルパスとSHA256はmanifest.jsonに記録しています。</li>
+</ul>
+<noscript><p>JavaScriptが無効なため、言語切替は使えません。日本語のレポートはそのまま閲覧できます。</p></noscript>
+</footer>
+</main>
+<script>
+(() => {
+  const buttons = document.querySelectorAll("[data-language]");
+  const setLanguage = (language) => {
+    if (language !== "ja" && language !== "en") return;
+    document.documentElement.lang = language;
+    document.querySelectorAll("[data-ja][data-en]").forEach((element) => {
+      element.textContent = element.getAttribute("data-" + language);
+    });
+    document.querySelectorAll("[data-aria-ja][data-aria-en]").forEach((element) => {
+      element.setAttribute("aria-label", element.getAttribute("data-aria-" + language));
+    });
+    buttons.forEach((button) => {
+      button.setAttribute("aria-pressed", String(button.getAttribute("data-language") === language));
+    });
+  };
+  buttons.forEach((button) => {
+    button.addEventListener("click", () => setLanguage(button.getAttribute("data-language")));
+  });
+})();
+</script>
+</body>
+</html>

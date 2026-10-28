@@ -1,0 +1,51 @@
+name: Measured and synthetic reproducible Pages
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: synthetic-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'aktsmm/m365-copilot-insights' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Validate public contract, reproducibility, department isolation and injection defenses
+        shell: pwsh
+        run: |
+          ./tests/Test-CopilotPipeline.ps1
+          ./tests/Test-CopilotPublicExposure.ps1
+          node --test ./tests/synthetic-pages.test.cjs ./tests/public-monthly.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Public monthly fixture tests failed' }
+          ./tests/Test-CopilotSyntheticPages.ps1 -EvidenceDirectory "$env:RUNNER_TEMP/synthetic-reproducibility"
+      - name: Build reviewed public-only measured export and independent synthetic fixtures
+        shell: pwsh
+        run: |
+          $result = ./scripts/Build-CopilotPublicPages.ps1 -OutputDirectory "$env:RUNNER_TEMP/synthetic-site"
+          $manifest = Get-Content "$env:RUNNER_TEMP/synthetic-site/manifest.json" -Raw | ConvertFrom-Json
+          if ($result.Status -ne 'success' -or -not $result.DistributionAllowed) { throw 'Synthetic build is not distributable' }
+          Get-FileHash "$env:RUNNER_TEMP/synthetic-site/summary.json" -Algorithm SHA256 | ForEach-Object { "synthetic-summary-sha256=$($_.Hash)" }
+          Get-FileHash "$env:RUNNER_TEMP/synthetic-site/synthetic-monthly.html" -Algorithm SHA256 | ForEach-Object { "synthetic-monthly-sha256=$($_.Hash)" }
+          Get-FileHash "$env:RUNNER_TEMP/synthetic-site/measured-monthly.html" -Algorithm SHA256 | ForEach-Object { "measured-monthly-sha256=$($_.Hash)" }
+      - name: Retain synthetic-only reproducibility manifest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: synthetic-pages-manifest
+          path: ${{ runner.temp }}/synthetic-site/manifest.json
+          retention-days: 7
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+        with:
+          path: ${{ runner.temp }}/synthetic-site
+          retention-days: 1
+      - name: Deploy explicitly separated measured and synthetic public demos
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

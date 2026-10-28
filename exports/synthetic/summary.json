@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "dataClass": "synthetic",
+  "status": "success",
+  "directoryUsers": 3,
+  "reportRefreshDate": "2026-10-27",
+  "reportPeriod": "30",
+  "totals": {
+    "reportUsers": 3,
+    "knownPromptsSubmitted": 20.0,
+    "unknownPromptUsers": 1,
+    "promptsSubmitted": null
+  },
+  "matched": {
+    "reportUsers": 3,
+    "knownPromptsSubmitted": 20.0,
+    "unknownPromptUsers": 1,
+    "promptsSubmitted": null
+  },
+  "quarantined": {
+    "reportUsers": 0,
+    "knownPromptsSubmitted": 0.0,
+    "unknownPromptUsers": 0,
+    "promptsSubmitted": 0.0
+  },
+  "departments": [
+    {
+      "department": "Engineering",
+      "slug": "dept-8c85b6639e62e10b8330a8b883004b43c119053d7d62b512a98c77eb069627a7",
+      "directoryUsers": 1,
+      "metrics": {
+        "reportUsers": 1,
+        "knownPromptsSubmitted": 8.0,
+        "unknownPromptUsers": 0,
+        "promptsSubmitted": 8.0
+      }
+    },
+    {
+      "department": "Sales",
+      "slug": "dept-e04eb29020eaa961e99d3162635e9fe9585c5a1121bd88784c1378aa8837195c",
+      "directoryUsers": 2,
+      "metrics": {
+        "reportUsers": 2,
+        "knownPromptsSubmitted": 12.0,
+        "unknownPromptUsers": 1,
+        "promptsSubmitted": null
+      }
+    }
+  ]
+}

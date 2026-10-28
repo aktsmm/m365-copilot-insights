@@ -1,0 +1,7 @@
+{
+  "value": [
+    { "userPrincipalName": "alice@example.invalid", "department": "Sales" },
+    { "userPrincipalName": "bob@example.invalid", "department": "Engineering" },
+    { "userPrincipalName": "carol@example.invalid", "department": "Sales" }
+  ]
+}
