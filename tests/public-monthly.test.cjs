@@ -71,3 +71,14 @@ test("reviewed measured export is pinned and retains unknown rather than fabrica
     }
   }
 });
+
+test("month-to-date view lists observed counts below threshold for incomplete months only by explicit view", () => {
+  const ui = require("../monthly-ui/dashboard.js");
+  const month = { rows: [
+    { displayName: "a", upn: "a@x", department: "d", count: null, observedCount: 2, knownDays: 5, unknownDays: 25, status: "unknown" },
+    { displayName: "b", upn: "b@x", department: "d", count: null, observedCount: 9, knownDays: 5, unknownDays: 25, status: "unknown" },
+    { displayName: "c", upn: "c@x", department: "d", count: null, observedCount: 0, knownDays: 0, unknownDays: 30, status: "unknown" }] };
+  const base = { threshold: "5", department: "", search: "", sort: "count" };
+  assert.deepEqual(ui.selectRows(month, { ...base, view: "mtd" }).map(r => r.displayName), ["a"]);
+  assert.equal(ui.selectRows(month, { ...base, view: "low" }).length, 0);
+});
