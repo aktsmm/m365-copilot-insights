@@ -49,7 +49,7 @@ $landing = @"
 <script>
 (() => {
   const param = new URLSearchParams(window.location.search).get("scoutTheme");
-  const theme = param || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+  const theme = param || "dark";
   document.documentElement.setAttribute("data-theme", theme);
 })();
 </script>
