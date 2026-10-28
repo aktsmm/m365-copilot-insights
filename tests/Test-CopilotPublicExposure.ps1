@@ -22,10 +22,10 @@ Assert ($pages -match 'Build-CopilotPublicPages.ps1' -and $pages -match 'workflo
 $probe = Get-Content -LiteralPath (Join-Path $flows 'oidc-probe.yml') -Raw
 Assert ($probe -notmatch 'login.microsoftonline|graph.microsoft.com|Write.*token|ConvertTo-Json.*claims') 'Probe must not exchange Azure tokens or print the whole JWT'
 Assert ($probe -match "'iss', 'aud', 'sub', 'repository', 'repository_id', 'repository_owner_id', 'ref'") 'OIDC claims allowlist drift'
-$graph = Get-Content -LiteralPath (Join-Path $root 'scripts\Copilot.Graph.psm1') -Raw
+$graph = Get-Content -LiteralPath (Join-Path $root 'scripts/Copilot.Graph.psm1') -Raw
 Assert ($graph -notmatch '\$problem\.error|\$code=\$|throw.*location.Host') 'Graph failure must not reflect service data'
-Assert (-not (Test-Path -LiteralPath (Join-Path $root 'scripts\Set-CopilotSiteGrant.ps1'))) 'Bootstrap must not ship'
-foreach ($path in @('scripts\Publish-CopilotMonthly.ps1','scripts\Publish-CopilotSiteObservation.ps1')) {
+Assert (-not (Test-Path -LiteralPath (Join-Path $root 'scripts/Set-CopilotSiteGrant.ps1'))) 'Bootstrap must not ship'
+foreach ($path in @('scripts/Publish-CopilotMonthly.ps1','scripts/Publish-CopilotSiteObservation.ps1')) {
     $text = Get-Content -LiteralPath (Join-Path $root $path) -Raw
     Assert ($text -match 'repo-\$env:GITHUB_REPOSITORY_ID-\$env:GITHUB_RUN_ID-\$env:GITHUB_RUN_ATTEMPT') 'New writes require repository-ID namespace'
 }
@@ -33,7 +33,7 @@ $commentary = Get-Content -LiteralPath (Join-Path $flows 'synthetic-commentary.l
 Assert ($commentary -notmatch 'id-token:|TENANT_ID|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID|SPO_') 'Agentic workflow has a private data capability'
 Assert ($commentary -notmatch '(?m)^  schedule:') 'Agentic must be manual-only'
 
-$work = Join-Path $PSScriptRoot ('.public-exposure-'+[guid]::NewGuid().ToString('N'))
+$work = Join-Path $PSScriptRoot ('public-exposure-'+[guid]::NewGuid().ToString('N'))
 $saved = @{}
 $keys = @('RUNNER_TEMP','GITHUB_REPOSITORY','GITHUB_REPOSITORY_ID','GITHUB_RUN_ID','GITHUB_RUN_ATTEMPT','GITHUB_STEP_SUMMARY',
     'GITHUB_OUTPUT','GITHUB_ENV','GITHUB_PATH','GITHUB_STATE','EXPOSURE_FIXTURE_PHASE','TENANT_ID','COLLECTOR_CLIENT_ID',
@@ -43,7 +43,7 @@ foreach ($key in $keys) { $saved[$key] = [Environment]::GetEnvironmentVariable($
 try {
     [void][IO.Directory]::CreateDirectory($work)
     foreach ($script in @('Invoke-CopilotPrivateRun.ps1','Invoke-CopilotPrivateWorker.ps1')) {
-        Copy-Item -LiteralPath (Join-Path $root "scripts\$script") -Destination (Join-Path $work $script)
+        Copy-Item -LiteralPath (Join-Path $root "scripts/$script") -Destination (Join-Path $work $script)
     }
     $stub = @'
 [CmdletBinding()]
@@ -87,7 +87,7 @@ if ($name -eq 'Get-CopilotCalendarProbe') {
         [IO.File]::WriteAllText($path,'preserved')
         [Environment]::SetEnvironmentVariable($name,$path)
     }
-    Import-Module (Join-Path $root 'scripts\Copilot.MonthlyPublish.psm1') -Force
+    Import-Module (Join-Path $root 'scripts/Copilot.MonthlyPublish.psm1') -Force
     $env:SPO_SITE_PATH = ''
     $env:SPO_OWNERSHIP_MARKER = ''
     $caught = $null
@@ -96,7 +96,7 @@ if ($name -eq 'Get-CopilotCalendarProbe') {
             -SiteId "example.sharepoint.com,$([guid]::Empty),$([guid]::Empty)" -LibraryId ([guid]::Empty)
     } catch { $caught = $_.Exception.Message }
     Assert ($caught -ceq 'Explicit site path and ownership marker required') 'Generalization bypassed the site ownership guard'
-    $module = Import-Module (Join-Path $root 'scripts\Copilot.Graph.psm1') -Force -PassThru
+    $module = Import-Module (Join-Path $root 'scripts/Copilot.Graph.psm1') -Force -PassThru
     & $module { function script:Invoke-RestMethod { throw 'private-auth-response-body@example.invalid' } }
     $env:ACTIONS_ID_TOKEN_REQUEST_URL = 'https://example.invalid/?fixture=1'
     $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN = 'fixture-only'

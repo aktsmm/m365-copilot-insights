@@ -4,8 +4,8 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
-Import-Module (Join-Path $root 'scripts\Copilot.History.psm1') -Force
-Import-Module (Join-Path $root 'scripts\Copilot.Calendar.psm1')
+Import-Module (Join-Path $root 'scripts/Copilot.History.psm1') -Force
+Import-Module (Join-Path $root 'scripts/Copilot.Calendar.psm1')
 $work=Join-Path $PSScriptRoot ('.history-test-'+[guid]::NewGuid().ToString('N'))
 $oldRunner=$env:RUNNER_TEMP
 $script:Assertions=0
@@ -76,7 +76,7 @@ function Set-Manifest([hashtable]$Map,[object]$Value) {
 try {
     [void][IO.Directory]::CreateDirectory($work)
     $env:RUNNER_TEMP=$work
-    foreach ($file in @((Join-Path $root 'scripts\Copilot.History.psm1'),$PSCommandPath)) {
+    foreach ($file in @((Join-Path $root 'scripts/Copilot.History.psm1'),$PSCommandPath)) {
         $errors=$null
         [void][Management.Automation.Language.Parser]::ParseFile($file,[ref]$null,[ref]$errors)
         Assert-True (@($errors).Count -eq 0) 'PowerShell syntax'

@@ -1,7 +1,7 @@
 #Requires -Version 7.5
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
-Import-Module (Join-Path $PSScriptRoot '..\scripts\Copilot.CurrentPointer.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot '../scripts/Copilot.CurrentPointer.psm1') -Force
 $checks = 0
 function Assert([bool]$Condition, [string]$Message) {
     if (-not $Condition) { throw $Message }

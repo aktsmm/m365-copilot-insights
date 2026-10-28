@@ -8,7 +8,7 @@ $evidence = [IO.Path]::GetFullPath($EvidenceDirectory)
 if (Test-Path -LiteralPath $evidence) { throw 'EvidenceDirectory must not exist.' }
 [void][IO.Directory]::CreateDirectory($evidence)
 $results = @(foreach ($name in @('first', 'second')) {
-    & (Join-Path $pocRoot 'scripts\Build-CopilotSyntheticPages.ps1') -OutputDirectory (Join-Path $evidence $name)
+    & (Join-Path $pocRoot 'scripts/Build-CopilotSyntheticPages.ps1') -OutputDirectory (Join-Path $evidence $name)
 })
 $first = Get-Content -LiteralPath (Join-Path $evidence 'first\manifest.json') -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable
 $second = Get-Content -LiteralPath (Join-Path $evidence 'second\manifest.json') -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable
@@ -28,7 +28,7 @@ foreach ($build in @('first', 'second')) {
 }
 $overwriteRejected = $false
 try {
-    & (Join-Path $pocRoot 'scripts\Build-CopilotSyntheticPages.ps1') -OutputDirectory (Join-Path $evidence 'first') | Out-Null
+    & (Join-Path $pocRoot 'scripts/Build-CopilotSyntheticPages.ps1') -OutputDirectory (Join-Path $evidence 'first') | Out-Null
 } catch {
     if ($_.Exception.Message -notlike 'OutputDirectory must not exist*') { throw }
     $overwriteRejected = $true

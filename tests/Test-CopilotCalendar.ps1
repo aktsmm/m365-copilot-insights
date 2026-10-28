@@ -4,8 +4,8 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $pocRoot = Split-Path $PSScriptRoot -Parent
-$module = Join-Path $pocRoot 'scripts\Copilot.Calendar.psm1'
-$build = Join-Path $pocRoot 'scripts\Build-CopilotMonthly.ps1'
+$module = Join-Path $pocRoot 'scripts/Copilot.Calendar.psm1'
+$build = Join-Path $pocRoot 'scripts/Build-CopilotMonthly.ps1'
 Import-Module $module -Force
 $work = Join-Path $PSScriptRoot ('.calendar-test-' + [guid]::NewGuid().ToString('N'))
 $oldRunner = $env:RUNNER_TEMP

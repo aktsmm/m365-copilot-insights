@@ -4,7 +4,7 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $pocRoot = Split-Path $PSScriptRoot -Parent
-$build = Join-Path $pocRoot 'scripts\Build-CopilotDashboard.ps1'
+$build = Join-Path $pocRoot 'scripts/Build-CopilotDashboard.ps1'
 $fixtureUsers = Join-Path $PSScriptRoot 'fixtures\users.json'
 $fixtureUsage = Join-Path $PSScriptRoot 'fixtures\usage.csv'
 $work = Join-Path $PSScriptRoot ('.test-work-' + [guid]::NewGuid().ToString('N'))
@@ -70,7 +70,7 @@ function Assert-JapaneseUi([string]$Html) {
 try {
     [void][IO.Directory]::CreateDirectory($work)
     $env:RUNNER_TEMP = $work
-    foreach ($path in @($build, (Join-Path $pocRoot 'scripts\Copilot.Data.psm1'), $PSCommandPath)) {
+    foreach ($path in @($build, (Join-Path $pocRoot 'scripts/Copilot.Data.psm1'), $PSCommandPath)) {
         $errors = $null
         [void][Management.Automation.Language.Parser]::ParseFile($path, [ref]$null, [ref]$errors)
         Assert-True (@($errors).Count -eq 0) "PowerShell syntax: $path"
@@ -338,7 +338,7 @@ try {
     Assert-Throws { & $build -UsersPath $fixtureUsers -UsagePath $fixtureUsage -OutputDirectory "$linkPath\report" -DataClass tenant } 'reparse-point'
     [IO.Directory]::Delete($linkPath)
 
-    Import-Module (Join-Path $pocRoot 'scripts\Copilot.Data.psm1') -Force
+    Import-Module (Join-Path $pocRoot 'scripts/Copilot.Data.psm1') -Force
     $measurement = Measure-CopilotSourceUsage -Rows (Get-FixtureUsage)
     Assert-True ($measurement.SourceRows -eq 3 -and $measurement.KnownPromptRows -eq 2 -and
         $measurement.UnknownPromptRows -eq 1 -and $measurement.KnownPromptTotal -eq 20) 'Source-only counts and known sum'

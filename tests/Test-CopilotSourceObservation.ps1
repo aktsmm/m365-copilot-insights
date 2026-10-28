@@ -2,7 +2,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $pocRoot = Split-Path $PSScriptRoot -Parent
-$export = Join-Path $pocRoot 'scripts\Export-CopilotSourceObservation.ps1'
+$export = Join-Path $pocRoot 'scripts/Export-CopilotSourceObservation.ps1'
 $work = Join-Path $PSScriptRoot ('.source-test-' + [guid]::NewGuid().ToString('N'))
 $previousTemp = $env:RUNNER_TEMP
 $script:Checks = 0
