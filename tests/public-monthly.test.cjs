@@ -48,7 +48,8 @@ test("public gate rejects relabeling, identity leaks, counts changes and unknown
     p => p.months[0].rows[0].extra = "secret",
     p => p.extra = "secret",
     p => p.months[0].source = "https://private.invalid",
-    p => p.months[0].rows[0].department = source.months[0].rows[0].department,
+    p => p.months[0].rows[0].displayName = source.months[0].rows[0].displayName,
+    p => p.months[0].rows[0].department = "00000000-0000-0000-0000-000000000000",
     p => p.months[0].rows[0].department = p.months[0].rows[1].department
   ];
   for (const mutate of mutations) {

@@ -10,6 +10,10 @@ const numericFields = ["count", "observedCount", "knownDays", "unknownDays", "st
 const rowFields = ["userId", "upn", "displayName", "department", ...numericFields];
 const pick = (source, fields) => Object.fromEntries(fields.map(key => [key, structuredClone(source[key])]));
 const numbered = (n, width) => String(n).padStart(width, "0");
+const maskWord = word => { const chars = [...word]; return chars[0] + "*".repeat(Math.max(1, chars.length - 1)); };
+const maskName = name => name.trim().split(/\s+/).map(maskWord).join(" ");
+const maskUpn = upn => maskWord(upn.split("@")[0]) + "@*****";
+const publicDepartment = name => (!name || /unassigned|poc demo/i.test(name)) ? "未割り当て" : name;
 
 function assertPublic(payload) {
   validate(payload);
@@ -23,34 +27,32 @@ function assertPublic(payload) {
       const id = "demo-user-" + numbered(index + 1, 3);
       assert.deepEqual(Object.keys(row).sort(), [...rowFields].sort());
       assert.equal(row.userId, id);
-      assert.equal(row.upn, id + "@example.invalid");
-      assert.equal(row.displayName, "デモ利用者 " + numbered(index + 1, 3));
-      assert.match(row.department, /^部門 [0-9]{2,}$/);
+      assert.match(row.upn, /^[^\s@*]\*+@\*{5}$/, "UPN must be masked");
+      assert.match(row.displayName, /^[^\s*]\*+( [^\s*]\*+)*$/, "Display name must be masked");
+      assert.match(row.department, /^(?!.*[0-9]{6,})[^@:\/]+$/, "Department must be a plain label");
     }
   }
   const serialized = JSON.stringify(payload);
   assert(!/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i.test(serialized), "Management GUID is not public");
   assert(!/https?:\/\/|sharepoint\.com|onmicrosoft\.com|access_token|client_secret|Bearer\s/i.test(serialized), "Internal URL or credential marker is not public");
   const emails = serialized.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) || [];
-  assert(emails.every(value => /^demo-user-[0-9]{3,}@example\.invalid$/.test(value)), "Original account address is not public");
+  assert(emails.length === 0, "Original account address is not public");
   return payload;
 }
 
 function sanitize(source) {
   validate(source);
   assert.equal(source.dataClass, "tenant");
-  const departments = new Map();
   const result = {
     schemaVersion: source.schemaVersion, dataClass: "tenant", generatedAt: source.generatedAt,
     months: source.months.map(month => ({
       ...pick(month, monthFields), coverage: pick(month.coverage, coverageFields),
       rows: month.rows.map((row, index) => {
-        if (!departments.has(row.department)) departments.set(row.department, "部門 " + numbered(departments.size + 1, 2));
         const id = "demo-user-" + numbered(index + 1, 3);
         return {
-          userId: id, upn: id + "@example.invalid",
-          displayName: "デモ利用者 " + numbered(index + 1, 3),
-          department: departments.get(row.department), ...pick(row, numericFields)
+          userId: id, upn: maskUpn(row.upn),
+          displayName: maskName(row.displayName),
+          department: publicDepartment(row.department), ...pick(row, numericFields)
         };
       })
     }))
@@ -65,7 +67,6 @@ function verify(source, output) {
   assert.equal(output.schemaVersion, source.schemaVersion);
   assert.equal(output.generatedAt, source.generatedAt);
   assert.equal(output.months.length, source.months.length);
-  const groups = new Map(), reverseGroups = new Map();
   for (const [index, original] of source.months.entries()) {
     const published = output.months[index];
     assert.deepEqual(pick(published, monthFields), pick(original, monthFields));
@@ -75,16 +76,15 @@ function verify(source, output) {
     for (const [rowIndex, row] of original.rows.entries()) {
       const publicRow = published.rows[rowIndex];
       assert.deepEqual(pick(publicRow, numericFields), pick(row, numericFields), "Observed values must be identical");
-      if (groups.has(row.department)) assert.equal(groups.get(row.department), publicRow.department);
-      if (reverseGroups.has(publicRow.department)) assert.equal(reverseGroups.get(publicRow.department), row.department);
-      groups.set(row.department, publicRow.department);
-      reverseGroups.set(publicRow.department, row.department);
+      assert.equal(publicRow.department, publicDepartment(row.department), "Department label must follow the public rule");
+      assert.equal(publicRow.displayName, maskName(row.displayName));
+      assert.equal(publicRow.upn, maskUpn(row.upn));
     }
   }
   const serialized = JSON.stringify(output).toLocaleLowerCase();
   for (const month of source.months) {
     for (const row of month.rows) {
-      for (const field of ["userId", "upn", "displayName", "department"]) {
+      for (const field of ["userId", "upn", "displayName"]) {
         if (row[field]) assert(!serialized.includes(row[field].toLocaleLowerCase()), "Original identity or department text is not public");
       }
     }
@@ -95,7 +95,7 @@ function verify(source, output) {
     uniqueCounts: output.months.map(month => new Set(month.rows.map(row => row.userId)).size),
     checks: ["measured-values-identical", "coverage-arrays-identical", "metadata-identical",
       "row-and-unique-counts-identical", "department-grouping-identical",
-      "original-identities-and-departments-absent", "management-identifiers-and-internal-urls-absent",
+      "names-and-accounts-masked-departments-public-label", "management-identifiers-and-internal-urls-absent",
       "canonical-fields-only", "tenant-dataclass-preserved"]
   };
 }

@@ -102,3 +102,11 @@ body { background: var(--cp-bg); }
 .cp-monthly .cp-warning { margin: .5rem 0; border-left: 3px solid var(--cp-warning); background: var(--cp-surface); padding: .5rem .875rem; border-radius: 0 6px 6px 0; font-size: .85rem; }
 .cp-monthly [role=status] { color: var(--cp-text-soft); font-size: .85rem; }
 @media (max-width: 30rem) { .cp-monthly { padding: .75rem; } .cp-monthly .cp-kpi .cp-kpi-value { font-size: 1.5rem; } }
+
+.cp-monthly .cp-kpis { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.cp-monthly .cp-presets { display: grid; gap: .35rem; align-content: end; }
+.cp-monthly .cp-presets > span { font-size: .85em; opacity: .75; }
+.cp-monthly .cp-presets button[aria-pressed="true"] { outline: 2px solid var(--cp-accent); font-weight: 700; }
+.cp-monthly .cp-more { display: flex; gap: 1rem; align-items: center; justify-content: center; margin: 1rem 0; }
+.cp-monthly .cp-panels { align-items: start; }
+.cp-monthly .cp-timeline { min-height: 3rem; }
