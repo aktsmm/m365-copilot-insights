@@ -63,7 +63,7 @@ $html = @"
 <script>
 (() => {
   const param = new URLSearchParams(window.location.search).get("scoutTheme");
-  const theme = param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const theme = param || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
   document.documentElement.setAttribute("data-theme", theme);
 })();
 </script>
