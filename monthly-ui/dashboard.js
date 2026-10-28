@@ -72,8 +72,8 @@
     return "\uFEFF" + [headers, ...rows.map(r => [month.month, month.metricId, month.source, month.dateBasis, month.reportRefreshDate, month.coverage.status, ...headers.slice(6).map(k => r[k])])].map(r => r.map(cell).join(",")).join("\r\n") + "\r\n";
   }
   const labels = {
-    ja: { title: "Copilot 月次利用状況", language: "English", month: "対象月", metric: "指標・ソース", department: "部門（集計時点）", search: "氏名 / UPN 検索", threshold: "しきい値（厳密に未満）", preset: "しきい値プリセット", view: "表示対象", low: "しきい値未満（確定値のみ）", mtd: "月初来の回数がしきい値未満（参考値）", mtdNote: "月初来 = 取得済みの日だけの合計です。月が終わるまで確定ではありません。", unknown: "不明・欠測", all: "全件", sort: "並び順", count: "確定回数", displayName: "氏名", reset: "リセット", result: "結果 CSV", allCsv: "選択月・指標の全体 CSV", departmentCsv: "部門 CSV", source: "ソース", basis: "ソース日付基準", refresh: "レポート基準日", generated: "生成日時", complete: "完全月", partial: "取得不足・参考値", "in-progress": "当月途中・参考値", observed: "観測回数（参考のみ）", known: "既知", missing: "欠測日", empty: "該当する行がありません。", warning: "欠測・当月途中の回数は参考値です。少利用を確定できません。不明は0として扱いません。", download: "CSV / HTMLの持ち出し後には、SharePointのアクセス制御・取り消しは適用されません。", showObserved: "観測回数（参考）を表示", total: "母集団", results: "結果", unavailable: "不明", synthetic: "合成データ（実績ではありません）", tenant: "テナントデータ" },
-    en: { title: "Copilot monthly usage", language: "日本語", month: "Month", metric: "Metric / source", department: "Department (at aggregation)", search: "Name / UPN search", threshold: "Threshold (strictly less than)", preset: "Threshold presets", view: "View", low: "Below threshold (confirmed only)", mtd: "Month-to-date below threshold (reference)", mtdNote: "Month-to-date = total of the dates collected so far; not final until the month ends.", unknown: "Unknown / missing", all: "All", sort: "Sort by", count: "Confirmed count", displayName: "Name", reset: "Reset", result: "Results CSV", allCsv: "All CSV (selected month / metric)", departmentCsv: "Department CSV", source: "Source", basis: "Source date basis", refresh: "Report refresh date", generated: "Generated at", complete: "Complete month", partial: "Partial / reference only", "in-progress": "In progress / reference only", observed: "Observed count (reference only)", known: "Known", missing: "Missing dates", empty: "No matching rows.", warning: "Incomplete / current-month counts are reference only, not confirmed low usage. Unknown is never zero.", download: "Downloaded CSV / HTML is no longer protected or revocable by SharePoint access controls.", showObserved: "Show observed counts (reference)", total: "Population", results: "Results", unavailable: "Unknown", synthetic: "Synthetic data (not actual usage)", tenant: "Tenant data" }
+    ja: { title: "Copilot 月次利用状況", language: "English", month: "対象月", metric: "指標・ソース", department: "部門（集計時点）", search: "氏名 / UPN 検索", threshold: "しきい値（厳密に未満）", preset: "しきい値プリセット", view: "表示対象", low: "しきい値未満（確定値のみ）", mtd: "月初来の回数がしきい値未満（参考値）", mtdNote: "月初来 = 取得済みの日だけの合計です。月が終わるまで確定ではありません。", unknown: "不明・欠測", all: "全件", sort: "並び順", count: "確定回数", displayName: "氏名", reset: "リセット", result: "結果 CSV", allCsv: "選択月・指標の全体 CSV", departmentCsv: "部門 CSV", source: "ソース", basis: "ソース日付基準", refresh: "レポート基準日", generated: "生成日時", complete: "完全月", partial: "取得不足・参考値", "in-progress": "当月途中・参考値", observed: "観測回数（参考のみ）", known: "既知", missing: "欠測日", empty: "該当する行がありません。", warning: "欠測・当月途中の回数は参考値です。少利用を確定できません。不明は0として扱いません。", download: "CSV / HTMLの持ち出し後には、SharePointのアクセス制御・取り消しは適用されません。", showObserved: "観測回数（参考）を表示", total: "母集団", results: "結果", unavailable: "不明", synthetic: "合成データ（実績ではありません）", tenant: "テナントデータ", kpiKnownSub: "確定済み", kpiUnknownSub: "0 ではありません", kpiCoverage: "取得カバレッジ", kpiDays: "日", kpiMedian: "観測回数 中央値", kpiMedianSub: "参考値", kpiBelow: "しきい値未満", kpiRef: "（参考）", timeline: "日別の取得状況", legendOk: "取得済み", legendMiss: "欠測", legendFuture: "未到来", histogram: "観測回数の分布（参考）" },
+    en: { title: "Copilot monthly usage", language: "日本語", month: "Month", metric: "Metric / source", department: "Department (at aggregation)", search: "Name / UPN search", threshold: "Threshold (strictly less than)", preset: "Threshold presets", view: "View", low: "Below threshold (confirmed only)", mtd: "Month-to-date below threshold (reference)", mtdNote: "Month-to-date = total of the dates collected so far; not final until the month ends.", unknown: "Unknown / missing", all: "All", sort: "Sort by", count: "Confirmed count", displayName: "Name", reset: "Reset", result: "Results CSV", allCsv: "All CSV (selected month / metric)", departmentCsv: "Department CSV", source: "Source", basis: "Source date basis", refresh: "Report refresh date", generated: "Generated at", complete: "Complete month", partial: "Partial / reference only", "in-progress": "In progress / reference only", observed: "Observed count (reference only)", known: "Known", missing: "Missing dates", empty: "No matching rows.", warning: "Incomplete / current-month counts are reference only, not confirmed low usage. Unknown is never zero.", download: "Downloaded CSV / HTML is no longer protected or revocable by SharePoint access controls.", showObserved: "Show observed counts (reference)", total: "Population", results: "Results", unavailable: "Unknown", synthetic: "Synthetic data (not actual usage)", tenant: "Tenant data", kpiKnownSub: "Confirmed", kpiUnknownSub: "Never zero", kpiCoverage: "Collection coverage", kpiDays: "days", kpiMedian: "Observed median", kpiMedianSub: "Reference only", kpiBelow: "Below threshold", kpiRef: "(reference)", timeline: "Daily collection status", legendOk: "Collected", legendMiss: "Missing", legendFuture: "Not yet", histogram: "Observed count distribution (reference)" }
   };
   let serial = 0;
   function mount(root, input, options) {
@@ -141,6 +141,45 @@
       let rows = [];
       try { rows = selectRows(month, state); threshold.removeAttribute("aria-invalid"); }
       catch (e) { error.textContent = e.message; threshold.setAttribute("aria-invalid", "true"); threshold.setAttribute("aria-describedby", error.id); }
+      const scope = month.rows.filter(r => !state.department || r.department === state.department);
+      const kpis = element("div"); kpis.className = "cp-kpis";
+      const pct = Math.round(month.coverage.availableDates.length / month.coverage.expectedDates.length * 100);
+      const observedValues = scope.map(r => r.observedCount).filter(isInt);
+      const median = observedValues.length ? [...observedValues].sort((a, b) => a - b)[Math.floor(observedValues.length / 2)] : null;
+      const lowN = scope.filter(r => isInt(r.observedCount) && r.observedCount < Number(state.threshold)).length;
+      [[t.total, scope.length, state.department || t.all, "var(--cp-accent)"],
+        [t.known, scope.filter(r => r.status === "known").length, t.kpiKnownSub, "var(--cp-success)"],
+        [t.unknown, scope.filter(r => r.status === "unknown").length, t.kpiUnknownSub, "var(--cp-warning)"],
+        [t.kpiCoverage, pct + "%", `${month.coverage.availableDates.length} / ${month.coverage.expectedDates.length} ${t.kpiDays}`, "var(--cp-accent)"],
+        [t.kpiMedian, median === null ? "—" : median, t.kpiMedianSub, "var(--cp-text)"],
+        [t.kpiBelow, lowN, `< ${state.threshold} ${t.kpiRef}`, "var(--cp-danger)"]].forEach(([k, v, sub, color]) => {
+        const tile = element("div", undefined, kpis); tile.className = "cp-kpi"; tile.style.setProperty("--cp-kpi", color);
+        element("div", k, tile).className = "cp-kpi-label"; element("div", String(v), tile).className = "cp-kpi-value"; element("div", sub, tile).className = "cp-kpi-sub";
+      });
+      const panels = element("div"); panels.className = "cp-panels";
+      const tl = element("section", undefined, panels); tl.className = "cp-panel"; element("h3", t.timeline, tl);
+      const strip = element("div", undefined, tl); strip.className = "cp-timeline"; strip.setAttribute("role", "img");
+      const dim = new Date(Date.UTC(Number(month.month.slice(0, 4)), Number(month.month.slice(5)), 0)).getUTCDate();
+      const avail = new Set(month.coverage.availableDates), exp = new Set(month.coverage.expectedDates);
+      strip.setAttribute("aria-label", `${t.timeline}: ${avail.size} / ${dim}`);
+      for (let d = 1; d <= dim; d++) {
+        const key = month.month + "-" + String(d).padStart(2, "0"), cell = element("i", undefined, strip);
+        cell.className = avail.has(key) ? "" : exp.has(key) ? "cp-miss" : "cp-future"; cell.title = key;
+      }
+      const legend = element("div", undefined, tl); legend.className = "cp-legend";
+      element("span", t.legendOk, legend); element("span", t.legendMiss, legend).className = "cp-l-miss"; element("span", t.legendFuture, legend).className = "cp-l-future";
+      const hp = element("section", undefined, panels); hp.className = "cp-panel"; element("h3", t.histogram, hp);
+      const hist = element("div", undefined, hp); hist.className = "cp-hist";
+      const buckets = [["0", 0, 0], ["1–4", 1, 4], ["5–9", 5, 9], ["10–14", 10, 14], ["15–29", 15, 29], ["30+", 30, Infinity]];
+      const counts = buckets.map(([, lo, hi]) => observedValues.filter(v => v >= lo && v <= hi).length);
+      counts.push(scope.length - observedValues.length);
+      const peak = Math.max(1, ...counts);
+      [...buckets.map(b => b[0]), t.unavailable].forEach((name, i) => {
+        element("span", name, hist).className = "cp-k";
+        const bar = element("span", undefined, hist); bar.className = "cp-bar";
+        const fill = element("b", undefined, bar); fill.style.width = (counts[i] / peak * 100) + "%"; if (i === counts.length - 1) fill.className = "cp-unk";
+        element("span", String(counts[i]), hist).className = "cp-n";
+      });
       const summary = element("p", `${t.total}: ${month.rows.length} · ${t.known}: ${month.rows.filter(r => r.status === "known").length} · ${t.unknown}: ${month.rows.filter(r => r.status === "unknown").length} · ${t.results}: ${rows.length}`);
       summary.setAttribute("role", "status"); summary.setAttribute("aria-live", "polite");
       const actions = element("div"); actions.className = "cp-actions";

@@ -49,28 +49,28 @@ $landing = @"
 <script>
 (() => {
   const param = new URLSearchParams(window.location.search).get("scoutTheme");
-  const theme = param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const theme = param || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
   document.documentElement.setAttribute("data-theme", theme);
 })();
 </script>
 <style>$css
 body { margin:0; background:var(--cp-bg); color:var(--cp-text); }
 a { color:var(--cp-link); }
-main { max-width:76rem; margin:auto; }
+main { max-width:76rem; margin:auto; } .hero { padding:1rem 0 .5rem; border-bottom:1px solid var(--cp-border); } .hero h1 { margin:.25rem 0; font-size:1.6rem; } .cp-monthly .card h2 { margin:0 0 .5rem; font-size:1.1rem; } .cp-monthly .card { padding:1rem 1.25rem; background:var(--cp-surface); border:1px solid var(--cp-border); border-top:3px solid var(--cp-accent); border-radius:8px; } .cp-monthly .card.syn { border-top-color:var(--cp-warning); } .tag { display:inline-block; padding:.05rem .5rem; border:1px solid var(--cp-border-strong); border-radius:999px; color:var(--cp-text-soft); font-size:.72rem; margin-right:.35rem; } .links { margin-top:1rem; display:flex; flex-wrap:wrap; gap:1.25rem; }
 </style></head>
 <body><main class="cp-monthly">
 <h1>Copilot 利用状況・公開デモ / Public usage demos</h1>
 <p>実測値と合成データを別画面で表示します。 / Measured and synthetic data are separate demos.</p>
 <div class="cp-results">
-<article><h2><a href="measured-monthly.html">1. Diamondデモ環境の実測値</a></h2>
+<article class="card"><h2><a href="measured-monthly.html">1. Diamondデモ環境の実測値</a></h2>
 <p>アカウント・部門名は公開用表記です。actionsでありpromptsではありません。当月不完全・unknownはzeroではありません。</p>
 <p>Measured demo-environment actions. Public-only identity labels. Incomplete month: unknown is not zero.</p>
 <p>「不明・欠測」または「全件」と「観測回数（参考）を表示」で、実取得の状態を確認できます。</p></article>
-<article><h2><a href="synthetic-monthly.html">2. 完全合成・月次しきい値デモ</a></h2>
+<article class="card syn"><h2><a href="synthetic-monthly.html">2. 完全合成・月次しきい値デモ</a></h2>
 <p>完全合成データ・実績ではありません。日本語／English、5・10・15・30未満／任意整数、部門、不明の挙動を確認できます。</p>
 <p>Fully synthetic, not actual usage. Demonstrates language switching, strict thresholds, department filters and unknown values.</p></article>
 </div>
-<p><a href="reporting-period.html">従来の期間集計（完全合成） / Reporting-period summary (synthetic)</a></p>
+<div class="links"><a href="reporting-period.html">従来の期間集計（完全合成） / Reporting-period summary (synthetic)</a><a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/setup-guide.md">セットアップガイド（必要な権限） / Setup guide</a><a href="https://github.com/aktsmm/m365-copilot-insights">GitHub</a></div>
 <p>公開ページに秘密・元アカウントID・元UPN・元氏名・元部署名・管理ID・内部URLは含めません。配布後の公開データは匿名閲覧・再配布が可能です。</p>
 </main></body></html>
 "@
