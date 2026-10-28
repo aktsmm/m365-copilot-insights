@@ -1,0 +1,31 @@
+name: Scoped OIDC claims probe
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  probe:
+    if: github.repository == 'aktsmm/m365-copilot-insights' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Observe only non-secret identity claims
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          try {
+            $response = Invoke-RestMethod -Uri "$env:ACTIONS_ID_TOKEN_REQUEST_URL&audience=api%3A%2F%2FAzureADTokenExchange" -Headers @{ Authorization = "Bearer $env:ACTIONS_ID_TOKEN_REQUEST_TOKEN" }
+            $part = $response.value.Split('.')[1].Replace('-', '+').Replace('_', '/')
+            $part = $part.PadRight($part.Length + ((4 - $part.Length % 4) % 4), '=')
+            $claims = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($part)) | ConvertFrom-Json -AsHashtable
+            $allowed = [ordered]@{}
+            foreach ($key in @('iss', 'aud', 'sub', 'repository', 'repository_id', 'repository_owner_id', 'ref')) {
+              if (-not $claims.ContainsKey($key)) { throw 'Required identity claim absent' }
+              $allowed[$key] = $claims[$key]
+            }
+            Write-Output ('OIDC_PUBLIC_CLAIMS=' + ($allowed | ConvertTo-Json -Compress))
+          } catch {
+            [Console]::Error.WriteLine('OIDC claims probe failed; private response details suppressed.')
+            exit 1
+          }
