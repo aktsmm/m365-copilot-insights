@@ -25,8 +25,8 @@ $measured = & (Join-Path $PSScriptRoot 'Export-CopilotMonthlyDashboard.ps1') `
     -PayloadPath $payloadPath -OutputPath (Join-Path $output 'measured-monthly.html') -DataClass tenant -ShowObservedCounts
 $utf8 = [Text.UTF8Encoding]::new($false)
 [IO.File]::WriteAllText((Join-Path $output 'measured-monthly.json'), $raw, $utf8)
-$nav = '<nav aria-label="公開デモの切替" style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><a style="color:var(--cp-link)" href="index.html">デモ一覧 / Demo home</a> | <a style="color:var(--cp-link)" href="measured-monthly.html">Diamond実測 / Measured demo environment</a> | <a style="color:var(--cp-link)" href="synthetic-monthly.html">完全合成 / Fully synthetic</a></nav>'
-$notice = '<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>Diamondデモ環境の実測値（アカウント・部門名は公開用表記）</strong><p>これはactionsでありpromptsではありません。当月不完全のため確定回数は不明です。unknownはzeroではなく、不明を0に置き換えていません。観測回数は参考値であり、少利用判定には使用しません。</p><p>Measured values from the Diamond demo environment; account and department names use public-only labels. Actions are not prompts. The current month is incomplete; unknown is not zero. Observed counts are reference only, never confirmed low usage.</p></aside>'
+$nav = '<nav aria-label="公開デモの切替" style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><a style="color:var(--cp-link)" href="index.html">デモ一覧 / Demo home</a> | <a style="color:var(--cp-link)" href="measured-monthly.html">Diamond実測 / Measured demo environment</a> | <a style="color:var(--cp-link)" href="synthetic-monthly.html">完全合成 / Fully synthetic</a> | <a style="color:var(--cp-link)" href="architecture.html">仕組みとデータ元 / How it works</a></nav>'
+$notice = '<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>Diamondデモ環境の実測値（アカウント・部門名は公開用表記）</strong><p>データ元: Microsoft Graph の Copilot 利用状況レポート（actions）とEntraのユーザー属性。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細・原本リンク</a></p><p>これはactionsでありpromptsではありません。当月不完全のため確定回数は不明です。unknownはzeroではなく、不明を0に置き換えていません。観測回数は参考値であり、少利用判定には使用しません。</p><p>Measured values from the Diamond demo environment; account and department names use public-only labels. Actions are not prompts. The current month is incomplete; unknown is not zero. Observed counts are reference only, never confirmed low usage.</p></aside>'
 $measuredPath = Join-Path $output 'measured-monthly.html'
 $html = Get-Content -LiteralPath $measuredPath -Raw -Encoding utf8
 $initialView = '<script>(() => { const view = document.querySelector(''select[id$="-view"]''); if (view) { view.value = "unknown"; view.dispatchEvent(new Event("change", { bubbles: true })); } })();</script>'
@@ -35,14 +35,48 @@ $html = $html.Replace('<main id="dashboard">', "$nav$notice<main id=`"dashboard`
 $syntheticPath = Join-Path $output 'synthetic-monthly.html'
 $html = Get-Content -LiteralPath $syntheticPath -Raw -Encoding utf8
 $html = [regex]::Replace($html, '<nav aria-label="合成デモの表示切替".*?</nav>', '', [Text.RegularExpressions.RegexOptions]::Singleline)
-$syntheticNotice = '<aside style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>完全合成データ・実績ではありません / Fully synthetic, not actual usage</strong></aside>'
+$syntheticNotice = '<aside style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>完全合成データ・実績ではありません / Fully synthetic, not actual usage</strong><p>データ元: リポジトリ内の合成フィクスチャ（<a style="color:var(--cp-link)" href="https://github.com/aktsmm/m365-copilot-insights/tree/main/exports/synthetic">exports/synthetic</a>）。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細</a></p></aside>'
 [IO.File]::WriteAllText($syntheticPath, $html.Replace('<main id="dashboard">', "$nav$syntheticNotice<main id=`"dashboard`">"), $utf8)
 $indexPath = Join-Path $output 'index.html'
 $periodPath = Join-Path $output 'reporting-period.html'
 $periodHtml = (Get-Content -LiteralPath $indexPath -Raw -Encoding utf8).Replace('href="index.html">従来の期間集計', 'href="reporting-period.html">従来の期間集計')
 [IO.File]::WriteAllText($periodPath, $periodHtml, $utf8)
 $css = Get-Content -LiteralPath (Join-Path $pocRoot 'monthly-ui\dashboard.css') -Raw -Encoding utf8
-$landing = @"
+$archPath = Join-Path $output 'architecture.html'
+$sp = 'https://diax14120418.sharepoint.com/sites/pocv-copilot-usage-20261028'
+$archBody = @"
+<main class="cp-monthly" style="max-width:62rem;margin:auto;line-height:1.7">
+<h1>仕組みとデータ元 / How it works</h1>
+<p><a href="index.html">&larr; 公開デモ一覧</a></p>
+<h2>全体の流れ</h2>
+<ol>
+<li><b>取得</b>: 非公開のGitHub Actionsが、OIDC連携でMicrosoft Graphの Copilot 利用状況レポートとEntraのユーザー一覧（部門）を取得します。</li>
+<li><b>匿名化・検証</b>: 非公開側で氏名・アカウント・部署名を公開用ラベルに置換し、契約（スキーマ）と固定ハッシュで検証します。unknown（欠測）は0に置き換えません。</li>
+<li><b>公開</b>: 検証済みの公開用JSONだけから静的HTML（このPages）をビルドします。秘密情報・元ID・内部URLは含みません。</li>
+<li><b>社内閲覧</b>: 同じ集計をSharePoint上のSPFx Webパーツ（日本語既定）とCSVダウンロードで提供します。</li>
+<li><b>解説</b>: Agentic Workflow（GitHub Copilot CLI）が集計値だけを読み、要約コメントをIssueに書き出します（今回の実行は変更なし）。</li>
+</ol>
+<h2 id="sources">データ元と原本リンク</h2>
+<table><thead><tr><th>#</th><th>画面・成果物</th><th>データ元</th><th>原本・参照</th></tr></thead><tbody>
+<tr><td>1</td><td><a href="measured-monthly.html">Diamond実測</a></td><td>Graph Copilot利用状況レポート（actions）＋Entraユーザー（部門）。当月は月初来の参考値</td><td><a href="measured-monthly.json">公開用JSON</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/reportroot-getmicrosoft365copilotusageuserdetail">Graph API</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/user-list">ユーザー一覧API</a></td></tr>
+<tr><td>2</td><td><a href="synthetic-monthly.html">完全合成</a></td><td>合成フィクスチャ（実績ではない）</td><td><a href="https://github.com/aktsmm/m365-copilot-insights/tree/main/exports/synthetic">exports/synthetic</a></td></tr>
+<tr><td>3</td><td><a href="reporting-period.html">従来の期間集計</a></td><td>合成データ（期間集計・prompts）</td><td><a href="manifest.json">manifest.json</a></td></tr>
+<tr><td>4</td><td>SharePoint（社内・要ログイン）</td><td>非公開側の検証済み集計（部門別）</td><td><a href="$sp">専用サイト</a>（権限のあるユーザーのみ）</td></tr>
+<tr><td>5</td><td>CSV</td><td>各ダッシュボード内の「CSVダウンロード」で、表示中の絞り込み結果を出力</td><td>各ページ内</td></tr>
+</tbody></table>
+<h2>リンク集</h2>
+<ul>
+<li><a href="$sp">SharePoint専用サイト（要ログイン）</a></li>
+<li><a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/setup-guide.md">セットアップガイド（必要な権限）</a></li>
+<li><a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/operations-notes.md">運用メモ</a></li>
+<li><a href="https://github.com/aktsmm/m365-copilot-insights">GitHubリポジトリ</a></li>
+<li><a href="https://learn.microsoft.com/ja-jp/sharepoint/dev/spfx/sharepoint-framework-overview">SharePoint Framework（SPFx）</a></li>
+</ul>
+<p>注意: 実測は actions であり prompts ではありません。月途中は確定できず「不明」と表示します。</p>
+</main>
+"@
+$archHtml = "<!doctype html><html lang=`"ja`"><head><meta charset=`"UTF-8`"><meta name=`"viewport`" content=`"width=device-width,initial-scale=1`"><title>仕組みとデータ元</title><script>document.documentElement.setAttribute('data-theme', new URLSearchParams(location.search).get('scoutTheme') || 'dark');</script><style>$css`nbody{margin:0;padding:1rem;background:var(--cp-bg);color:var(--cp-text)}a{color:var(--cp-link)}table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--cp-border);padding:.4rem .6rem;text-align:left;vertical-align:top}th{background:var(--cp-surface)}li{margin:.3rem 0}</style></head><body>$archBody</body></html>"
+[IO.File]::WriteAllText($archPath, $archHtml, $utf8)$landing = @"
 <!doctype html>
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Copilot 利用状況・公開デモ</title>
@@ -70,7 +104,7 @@ main { max-width:76rem; margin:auto; } .hero { padding:1rem 0 .5rem; border-bott
 <p>完全合成データ・実績ではありません。日本語／English、5・10・15・30未満／任意整数、部門、不明の挙動を確認できます。</p>
 <p>Fully synthetic, not actual usage. Demonstrates language switching, strict thresholds, department filters and unknown values.</p></article>
 </div>
-<div class="links"><a href="reporting-period.html">従来の期間集計（完全合成） / Reporting-period summary (synthetic)</a><a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/setup-guide.md">セットアップガイド（必要な権限） / Setup guide</a><a href="https://github.com/aktsmm/m365-copilot-insights">GitHub</a></div>
+<div class="links"><a href="architecture.html"><b>仕組みとデータ元 / How it works</b></a><a href="https://diax14120418.sharepoint.com/sites/pocv-copilot-usage-20261028">SharePoint（要ログイン）</a><a href="reporting-period.html">従来の期間集計（完全合成） / Reporting-period summary (synthetic)</a><a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/setup-guide.md">セットアップガイド（必要な権限） / Setup guide</a><a href="https://github.com/aktsmm/m365-copilot-insights">GitHub</a></div>
 <p>公開ページに秘密・元アカウントID・元UPN・元氏名・元部署名・管理ID・内部URLは含めません。配布後の公開データは匿名閲覧・再配布が可能です。</p>
 </main></body></html>
 "@
