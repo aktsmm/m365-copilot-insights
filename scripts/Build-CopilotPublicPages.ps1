@@ -69,8 +69,8 @@ $archBody = @"
 <tr><td>1</td><td>M365 管理センター &gt; レポート &gt; Microsoft 365 Copilot</td><td>Graph Copilot利用状況レポート（v1.0 CSV）をGitHub ActionsがOIDCで無人取得</td><td>自動取得済み</td></tr>
 <tr><td>2</td><td>同 日別</td><td>Graph beta 日別（最新更新日の7日前から）を蓄積</td><td>窓外は復元不可</td></tr>
 <tr><td>3</td><td>部門（Entraユーザー属性）</td><td>Graph users（department）をUPNで突合</td><td>自動取得済み</td></tr>
-<tr><td>4</td><td>Viva Insights Copilotダッシュボード</td><td>人がUIで操作する「データのエクスポート」CSVのみ。無人APIは未確認</td><td>手動のみ</td></tr>
-<tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td><td>Power BI / Fabric コネクタ（Partition ID・Query ID必要）</td><td>未達（分析メニューが非表示、行動分析情報がオフ）</td></tr>
+<tr><td>4</td><td>Viva Insights Copilotダッシュボード</td><td>人がUIで操作する「データのエクスポート」CSVのみ。無人APIは未確認</td><td>ブラウザ操作（CDP）で自動取得に成功。無人化は未達</td></tr>
+<tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td><td>Power BI / Fabric コネクタ（Partition ID・Query ID必要）</td><td>対応中（機能アクセスポリシーを作成済み・反映待ち。分析メニューが出れば接続）</td></tr>
 </tbody></table>
 <p>詳細と公式リンク: <a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/data-sources.md">画面ごとのデータ取得方式（docs/data-sources.md）</a></p>
 <h2>リンク集</h2>

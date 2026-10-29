@@ -11,8 +11,8 @@
 | 1 | M365 管理センター > レポート > 使用状況 > Microsoft 365 Copilot | Microsoft Graph `copilot/reports/getMicrosoft365CopilotUsageUserDetail`（v1.0、CSV） | GitHub Actions が OIDC でアプリ認証し、Graph から直接取得（人のログイン不要） | 自動取得済み（無人で別 runner 2 回成功） |
 | 2 | 同上の日別 | Graph beta `getMicrosoft365CopilotUsageUserDetailByDate` | 最新更新日の 7 日前から取得できる窓を使い、日別履歴を蓄積 | 取得口は実測済み。完全な暦月の全プロンプト数は窓外を復元できない |
 | 3 | 部門（Entra のユーザー属性） | Graph `users`（department） | 同じアプリで取得し、UPN で突合 | 自動取得済み |
-| 4 | Viva Insights > Copilot ダッシュボード（準備状況・導入・影響） | 画面は集計表示。個人別の無人 API は公式に未確認 | 取得していない。ダッシュボード右上の「データのエクスポート (プレビュー)」は人が UI で操作する CSV | 手動のみ。自動取得は未達 |
-| 5 | Viva Insights 高度分析（Analysis results のクエリ） | Power BI コネクタ / Fabric Dataflow Gen2（Partition ID と Query ID が必要） | 公式の自動取得経路はこれ。未接続 | 未達（下記の止まりどころ） |
+| 4 | Viva Insights > Copilot ダッシュボード（準備状況・導入・影響） | 画面は集計表示。個人別の無人 API は公式に未確認 | 取得していない。ダッシュボード右上の「データのエクスポート (プレビュー)」は人が UI で操作する CSV | ログイン済みブラウザの CDP 操作（`scripts/viva_export_cdp.py`）で自動取得に成功（2026-10-29、週×人×部署の CSV）。完全な無人化は未達 |
+| 5 | Viva Insights 高度分析（Analysis results のクエリ） | Power BI コネクタ / Fabric Dataflow Gen2（Partition ID と Query ID が必要） | 公式の自動取得経路はこれ。未接続 | 対応中。管理者の機能アクセスポリシー（Copilot メトリックス エクスポート）を作成済みで反映待ち（最大 24 時間）。Analysis メニューが出れば接続する（下記の止まりどころ） |
 
 ## Viva Insights の自動取得が止まっている理由（実機で確認した事実）
 

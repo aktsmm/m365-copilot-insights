@@ -19,7 +19,7 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 | 3 | 公開 Pages に、公開用に加工したデータだけを静的に公開 | 検証済み |
 | 4 | SharePoint ページ用 SPFx Web パーツ | アプリカタログ登録・デプロイ・専用サイトへのインストールまで完了。一般ユーザーでの閲覧確認は未実施 |
 | 5 | Agentic Workflow による解説生成 | 実行成功（出力は noop 設計で、解説文は公開されません） |
-| 6 | Viva Insights の自動取得 | 未達 |
+| 6 | Viva Insights の自動取得 | Copilot Dashboard の CSV は CDP で自動取得に成功。高度分析と完全無人化は対応中 |
 
 ## 見方の約束
 
