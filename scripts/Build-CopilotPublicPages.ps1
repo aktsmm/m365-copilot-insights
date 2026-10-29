@@ -25,7 +25,7 @@ $measured = & (Join-Path $PSScriptRoot 'Export-CopilotMonthlyDashboard.ps1') `
     -PayloadPath $payloadPath -OutputPath (Join-Path $output 'measured-monthly.html') -DataClass tenant -ShowObservedCounts
 $utf8 = [Text.UTF8Encoding]::new($false)
 [IO.File]::WriteAllText((Join-Path $output 'measured-monthly.json'), $raw, $utf8)
-$nav = '<nav aria-label="公開デモの切替" style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><a style="color:var(--cp-link)" href="index.html">Diamond実測（トップ） / Measured home</a> | <a style="color:var(--cp-link)" href="synthetic-monthly.html">完全合成デモ / Fully synthetic demo</a> | <a style="color:var(--cp-link)" href="reporting-period.html">従来の期間集計（合成） / Period summary</a> | <a style="color:var(--cp-link)" href="https://diax14120418.sharepoint.com/sites/pocv-copilot-usage-20261028">SharePoint（要ログイン）</a> | <a style="color:var(--cp-link)" href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/setup-guide.md">セットアップ・必要権限</a> | <a style="color:var(--cp-link)" href="https://github.com/aktsmm/m365-copilot-insights">GitHub</a> | <a style="color:var(--cp-link)" href="architecture.html">仕組みとデータ元 / How it works</a></nav>'
+$nav = '<nav aria-label="公開デモの切替" style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><a style="color:var(--cp-link)" href="index.html">Diamond実測（トップ） / Measured home</a> | <a style="color:var(--cp-link)" href="synthetic-monthly.html">完全合成デモ / Fully synthetic demo</a> | <a style="color:var(--cp-link)" href="reporting-period.html">従来の期間集計（合成） / Period summary</a> | <a style="color:var(--cp-link)" href="https://diax14120418.sharepoint.com/sites/pocv-copilot-usage-20261028">SharePoint（要ログイン）</a> | <a style="color:var(--cp-link)" href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/setup-guide.md">セットアップ・必要権限</a> | <a style="color:var(--cp-link)" href="https://github.com/aktsmm/m365-copilot-insights">GitHub</a> | <a style="color:var(--cp-link)" href="architecture.html">仕組みとデータ元 / How it works</a> | <a style="color:var(--cp-link)" href="architecture.html#portal-map">M365/Viva画面との対応</a></nav>'
 $notice = '<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>Diamondデモ環境の実測値（氏名・アカウントは * で一部伏せ字、部門名は実データ）</strong><p>データ元: Microsoft Graph の Copilot 利用状況レポート（actions）とEntraのユーザー属性。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細・原本リンク</a></p><p>これはactionsでありpromptsではありません。当月不完全のため確定回数は不明です。unknownはzeroではなく、不明を0に置き換えていません。観測回数は参考値であり、少利用判定には使用しません。</p><p>Measured values from the Diamond demo environment; names and accounts are partially masked with *, department names are real. Actions are not prompts. The current month is incomplete; unknown is not zero. Observed counts are reference only, never confirmed low usage.</p></aside>'
 $measuredPath = Join-Path $output 'measured-monthly.html'
 $html = Get-Content -LiteralPath $measuredPath -Raw -Encoding utf8
@@ -64,6 +64,15 @@ $archBody = @"
 <tr><td>4</td><td>SharePoint（社内・要ログイン）</td><td>非公開側の検証済み集計（部門別）</td><td><a href="$sp">専用サイト</a>（権限のあるユーザーのみ）</td></tr>
 <tr><td>5</td><td>CSV</td><td>各ダッシュボード内の「CSVダウンロード」で、表示中の絞り込み結果を出力</td><td>各ページ内</td></tr>
 </tbody></table>
+<h2 id="portal-map">M365 / Viva Insights の画面との対応</h2>
+<table><thead><tr><th>#</th><th>見ている画面</th><th>取得方式</th><th>状態</th></tr></thead><tbody>
+<tr><td>1</td><td>M365 管理センター &gt; レポート &gt; Microsoft 365 Copilot</td><td>Graph Copilot利用状況レポート（v1.0 CSV）をGitHub ActionsがOIDCで無人取得</td><td>自動取得済み</td></tr>
+<tr><td>2</td><td>同 日別</td><td>Graph beta 日別（最新更新日の7日前から）を蓄積</td><td>窓外は復元不可</td></tr>
+<tr><td>3</td><td>部門（Entraユーザー属性）</td><td>Graph users（department）をUPNで突合</td><td>自動取得済み</td></tr>
+<tr><td>4</td><td>Viva Insights Copilotダッシュボード</td><td>人がUIで操作する「データのエクスポート」CSVのみ。無人APIは未確認</td><td>手動のみ</td></tr>
+<tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td><td>Power BI / Fabric コネクタ（Partition ID・Query ID必要）</td><td>未達（分析メニューが非表示、行動分析情報がオフ）</td></tr>
+</tbody></table>
+<p>詳細と公式リンク: <a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/data-sources.md">画面ごとのデータ取得方式（docs/data-sources.md）</a></p>
 <h2>リンク集</h2>
 <ul>
 <li><a href="$sp">SharePoint専用サイト（要ログイン）</a></li>
