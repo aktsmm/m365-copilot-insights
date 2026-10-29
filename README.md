@@ -8,6 +8,7 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 - 自分のテナントで動かす手順（**前提条件チェックリストと必要な権限を含む**）: [docs/setup-guide.md](docs/setup-guide.md)
 - エージェントにセットアップを任せる手順（環境変数・依頼文つき）: [docs/agent-setup.md](docs/agent-setup.md)
 - M365 / Viva Insights の画面ごとのデータ取得方式: [docs/data-sources.md](docs/data-sources.md)（公開ページ: [仕組みとデータ元](https://aktsmm.github.io/m365-copilot-insights/architecture.html#portal-map)）
+- デモ用の利用実績を作る手順（任意・自分のデモテナントのみ）: [docs/demo-usage-seeding.md](docs/demo-usage-seeding.md)
 - 運用メモ（詳細・英語）: [docs/operations-notes.md](docs/operations-notes.md)
 
 ## できること
@@ -19,7 +20,7 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 | 3 | 公開 Pages に、公開用に加工したデータだけを静的に公開 | 検証済み |
 | 4 | SharePoint ページ用 SPFx Web パーツ | アプリカタログ登録・デプロイ・専用サイトへのインストールまで完了。一般ユーザーでの閲覧確認は未実施 |
 | 5 | Agentic Workflow による解説生成 | 実行成功（出力は noop 設計で、解説文は公開されません） |
-| 6 | Viva Insights の自動取得 | Copilot Dashboard の CSV は CDP で自動取得に成功。高度分析と完全無人化は対応中 |
+| 6 | Viva Insights の自動取得 | Copilot Dashboard の CSV は CDP で自動取得に成功。高度分析（Power BI / Fabric）は、行動分析情報の有効化ポリシーを作成して反映待ち（「分析」メニューが出るまで未達）。完全無人化は未達 |
 
 ## 見方の約束
 
