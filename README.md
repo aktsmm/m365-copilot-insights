@@ -5,7 +5,8 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 - 公開デモ: https://aktsmm.github.io/m365-copilot-insights/
   - 実測版: デモ環境（人物・アカウントはすべて架空）の実測値。氏名・UPN は * で一部伏せ字、部門名は実データです
   - 合成版: 完全な合成データ。しきい値（5・10・15・30 未満、任意の整数）、部門フィルター、不明値の挙動を試せます
-- 自分のテナントで動かす手順（**事前に必要な権限を含む**）: [docs/setup-guide.md](docs/setup-guide.md)
+- 自分のテナントで動かす手順（**前提条件チェックリストと必要な権限を含む**）: [docs/setup-guide.md](docs/setup-guide.md)
+- エージェントにセットアップを任せる手順（環境変数・依頼文つき）: [docs/agent-setup.md](docs/agent-setup.md)
 - 運用メモ（詳細・英語）: [docs/operations-notes.md](docs/operations-notes.md)
 
 ## できること

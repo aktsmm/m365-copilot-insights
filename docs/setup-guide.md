@@ -4,6 +4,23 @@
 
 > 注意: 実測は「架空の人物だけのデモテナント」で行っています。実在の従業員がいる環境で使う場合は、「3. 実環境での注意」を必ず読んでください。
 
+## 前提条件チェックリスト（最初にここだけ確認）
+
+着手前に、次の表がすべて「はい」になるかを確認してください。1 つでも「いいえ」なら、先にその権限・契約を用意します。詳細な権限は「1. 事前に必要な権限」にあります。
+
+| # | 確認項目 | 必要な状態 | 確認方法 |
+|---|---------|-----------|---------|
+| 1 | Microsoft 365 テナント | Copilot ライセンスが割り当てられたユーザーがいる | 管理センター → 課金 → ライセンス |
+| 2 | Entra の管理者操作 | アプリ登録、アプリケーション権限への管理者同意（Privileged Role Administrator か Global Administrator）ができる人が操作できる | Entra 管理センター → ロールと管理者 |
+| 3 | SharePoint | 専用サイトを作れる（SharePoint 管理者）。SPFx を使うならアプリカタログも必要 | SharePoint 管理センター |
+| 4 | レポートの匿名化設定 | 部門別にするなら「名前を匿名化して表示」をオフにできる（実在従業員がいる環境は組織承認が先） | 管理センター → 設定 → 組織設定 → レポート |
+| 5 | GitHub アカウント | **GitHub Free の個人アカウントで足ります**。Enterprise / Enterprise Managed Users は不要。Actions と OIDC が使えること | リポジトリの Settings → Actions |
+| 6 | GitHub Pages | 公開リポジトリなら Free で可。**非公開リポジトリで Pages を使うには有料プランが必要**。Pages には加工済みの公開用データだけを載せる | Settings → Pages |
+| 7 | Agentic 解説（任意） | Copilot が使える個人アカウント。Copilot 契約がなければ解説なしでも他は動く | 個人設定 → Copilot |
+| 8 | ローカル作業環境（任意） | `gh`（GitHub CLI）、`az`（Azure CLI）、PowerShell 7、Node.js が入っている | `gh --version` など |
+
+> 組織（GitHub Organization / Enterprise）で運用する場合は、Actions の許可アクション、OIDC の subject 形式、Pages の公開範囲が組織ポリシーで制限されることがあります。管理者に事前確認してください。
+
 ## 0. 全体の流れ
 
 ```mermaid
