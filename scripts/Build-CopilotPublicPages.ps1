@@ -51,7 +51,7 @@ $archBody = @"
 <h2>全体の流れ</h2>
 <ol>
 <li><b>取得</b>: 非公開のGitHub Actionsが、OIDC連携でMicrosoft Graphの Copilot 利用状況レポートとEntraのユーザー一覧（部門）を取得します。</li>
-<li><b>匿名化・検証</b>: 非公開側で氏名・アカウント・部署名を公開用ラベルに置換し、契約（スキーマ）と固定ハッシュで検証します。unknown（欠測）は0に置き換えません。</li>
+<li><b>匿名化・検証</b>: 非公開側で氏名・UPNを * で一部伏せ字にし（部署名は実データ）、GUID・ドメイン・URLを除いたうえで、契約（スキーマ）と固定ハッシュで検証します。unknown（欠測）は0に置き換えません。</li>
 <li><b>公開</b>: 検証済みの公開用JSONだけから静的HTML（このPages）をビルドします。秘密情報・元ID・内部URLは含みません。</li>
 <li><b>社内閲覧</b>: 同じ集計をSharePoint上のSPFx Webパーツ（日本語既定）とCSVダウンロードで提供します。</li>
 <li><b>解説</b>: Agentic Workflow（GitHub Copilot CLI）が集計値だけを読み、要約コメントをIssueに書き出します（今回の実行は変更なし）。</li>
