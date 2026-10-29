@@ -26,17 +26,22 @@ $measured = & (Join-Path $PSScriptRoot 'Export-CopilotMonthlyDashboard.ps1') `
 $utf8 = [Text.UTF8Encoding]::new($false)
 [IO.File]::WriteAllText((Join-Path $output 'measured-monthly.json'), $raw, $utf8)
 $nav = '<nav aria-label="公開デモの切替" style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><a style="color:var(--cp-link)" href="index.html">Diamond実測（トップ） / Measured home</a> | <a style="color:var(--cp-link)" href="synthetic-monthly.html">完全合成デモ / Fully synthetic demo</a> | <a style="color:var(--cp-link)" href="reporting-period.html">従来の期間集計（合成） / Period summary</a> | <a style="color:var(--cp-link)" href="https://diax14120418.sharepoint.com/sites/pocv-copilot-usage-20261028">SharePoint（要ログイン）</a> | <a style="color:var(--cp-link)" href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/setup-guide.md">セットアップ・必要権限</a> | <a style="color:var(--cp-link)" href="https://github.com/aktsmm/m365-copilot-insights">GitHub</a> | <a style="color:var(--cp-link)" href="architecture.html">仕組みとデータ元 / How it works</a> | <a style="color:var(--cp-link)" href="architecture.html#portal-map">M365/Viva画面との対応</a></nav>'
+function Set-NavCurrent([string]$Nav, [string]$Href) {
+    $plain = '<a style="color:var(--cp-link)" href="' + $Href + '">'
+    $current = '<a aria-current="page" style="color:var(--cp-text);font-weight:700;text-decoration:none;border-bottom:2px solid var(--cp-warning)" href="' + $Href + '">'
+    $Nav.Replace($plain, $current)
+}
 $notice = '<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>Diamondデモ環境の実測値（氏名・アカウントは * で一部伏せ字、部門名は実データ）</strong><p>データ元: Microsoft Graph の Copilot 利用状況レポート（actions）とEntraのユーザー属性。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細・原本リンク</a></p><p>これはactionsでありpromptsではありません。当月不完全のため確定回数は不明です。unknownはzeroではなく、不明を0に置き換えていません。観測回数は参考値であり、少利用判定には使用しません。</p><p>Measured values from the Diamond demo environment; names and accounts are partially masked with *, department names are real. Actions are not prompts. The current month is incomplete; unknown is not zero. Observed counts are reference only, never confirmed low usage.</p></aside>'
 $measuredPath = Join-Path $output 'measured-monthly.html'
 $html = Get-Content -LiteralPath $measuredPath -Raw -Encoding utf8
 $initialView = '<script>(() => { const view = document.querySelector(''select[id$="-view"]''); if (view) { view.value = "unknown"; view.dispatchEvent(new Event("change", { bubbles: true })); } })();</script>'
-$html = $html.Replace('<main id="dashboard">', "$nav$notice<main id=`"dashboard`">").Replace('</body>', "$initialView</body>")
+$html = $html.Replace('<main id="dashboard">', "$(Set-NavCurrent $nav 'index.html')$notice<main id=`"dashboard`">").Replace('</body>', "$initialView</body>")
 [IO.File]::WriteAllText($measuredPath, $html, $utf8)
 $syntheticPath = Join-Path $output 'synthetic-monthly.html'
 $html = Get-Content -LiteralPath $syntheticPath -Raw -Encoding utf8
 $html = [regex]::Replace($html, '<nav aria-label="合成デモの表示切替".*?</nav>', '', [Text.RegularExpressions.RegexOptions]::Singleline)
 $syntheticNotice = '<aside style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>完全合成データ・実績ではありません / Fully synthetic, not actual usage</strong><p>データ元: リポジトリ内の合成フィクスチャ（<a style="color:var(--cp-link)" href="https://github.com/aktsmm/m365-copilot-insights/tree/main/exports/synthetic">exports/synthetic</a>）。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細</a></p></aside>'
-[IO.File]::WriteAllText($syntheticPath, $html.Replace('<main id="dashboard">', "$nav$syntheticNotice<main id=`"dashboard`">"), $utf8)
+[IO.File]::WriteAllText($syntheticPath, $html.Replace('<main id="dashboard">', "$(Set-NavCurrent $nav 'synthetic-monthly.html')$syntheticNotice<main id=`"dashboard`">"), $utf8)
 $indexPath = Join-Path $output 'index.html'
 $periodPath = Join-Path $output 'reporting-period.html'
 $periodHtml = (Get-Content -LiteralPath $indexPath -Raw -Encoding utf8).Replace('href="index.html">従来の期間集計', 'href="reporting-period.html">従来の期間集計')
