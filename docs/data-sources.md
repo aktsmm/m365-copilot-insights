@@ -22,6 +22,19 @@
 - Graph だけで近似できるのはアプリ別のアクティブ日数まで（日次スナップショットを蓄積）。操作数・プロンプト数・習慣化割合・会議サマリーは Graph に無い。
 - Fabric / Power BI 経路には容量（追加費用の可能性）が必要。
 
+## 無人で取れる経路の整理（2026-10-29 調査）
+
+| # | 経路 | 取れるもの | 無人化 | 状況 |
+| --- | --- | --- | --- | --- |
+| 1 | Graph の Copilot 利用状況レポート | ユーザー別の最終利用日・アクティブ判定 | アプリ権限 + OIDC で可 | 運用中 |
+| 2 | Purview 監査ログ（CopilotInteraction） | ユーザー別・アプリ別・エージェント別の操作件数 | Graph の監査ログクエリ。アプリ権限 + OIDC で可（管理者同意が必要） | 委任トークンで取得を確認。無人化は未実施 |
+| 3 | Viva の Copilot / エージェント ダッシュボードの Export | 約 110 列の集計 | 画面のボタンのみで API なし | 有人のみ |
+| 4 | Viva 高度分析 + Power BI / Fabric コネクタ | 最も詳細な集計 | 手順書は組織アカウントの対話サインインのみ。サービスプリンシパルの記載なし | デモテナントでは利用不可と公式に明記（本環境がデモ種別かは未確認） |
+
+- 公式の記載: 「デモテナントでは高度分析にアクセスできない」（[Viva Insights のエラー対処](https://learn.microsoft.com/troubleshoot/viva/insights/error-messages/viva-insights-errors#advanced-analysis)）。
+- 高度分析の前提: 50 以上の対象ライセンス、Insights Analyst ロール、行動分析情報のオン（反映に数日）。[手順](https://learn.microsoft.com/viva/insights/advanced/setup-maint/enable-disable-behavioral-insights)。
+- エージェント別の人気: 管理センターの Agents usage レポートは画面のみ。無人で集計するなら、監査ログの `AgentName` を集計する方法が現実的です（エージェントを使った実績が必要）。
+
 ## 方式の違いの読み方
 
 - Graph 取得は「アプリがトークンを取る無人方式」。人の Cookie やブラウザ操作は使わない。
