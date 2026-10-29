@@ -45,6 +45,8 @@ $syntheticNotice = '<aside style="padding:1rem;background:var(--cp-surface);colo
 $indexPath = Join-Path $output 'index.html'
 $periodPath = Join-Path $output 'reporting-period.html'
 $periodHtml = (Get-Content -LiteralPath $indexPath -Raw -Encoding utf8).Replace('href="index.html">従来の期間集計', 'href="reporting-period.html">従来の期間集計')
+$periodNotice = '<aside style="padding:1rem;background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>完全合成データ・実績ではありません / Fully synthetic, not actual usage</strong></aside>'
+$periodHtml = [regex]::Replace($periodHtml, '<nav aria-label="合成デモの表示切替".*?</nav>', [Text.RegularExpressions.MatchEvaluator]{ param($m) (Set-NavCurrent $nav 'reporting-period.html') + $periodNotice }, [Text.RegularExpressions.RegexOptions]::Singleline)
 [IO.File]::WriteAllText($periodPath, $periodHtml, $utf8)
 $css = Get-Content -LiteralPath (Join-Path $pocRoot 'monthly-ui\dashboard.css') -Raw -Encoding utf8
 $archPath = Join-Path $output 'architecture.html'
