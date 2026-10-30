@@ -18,6 +18,13 @@ foreach ($name in @('live-validation.yml','calendar-validation.yml')) {
 }
 $usage = Get-Content -LiteralPath (Join-Path $root 'scripts/Get-CopilotUsage.ps1') -Raw
 Assert ($usage -match "ExpectedRoles @\('Reports\.Read\.All','User\.Read\.All'\)") 'Collector must keep the exact least-privilege role set (Reports.Read.All, User.Read.All); extra Graph roles stop the pipeline, so use a separate app for other APIs'
+$audit = Get-Content -LiteralPath (Join-Path $flows 'audit-aggregate.yml') -Raw
+Assert ($audit -match 'workflow_dispatch:' -and $audit -notmatch 'schedule:|push:|pull_request:') 'Audit aggregate must be manual-only'
+Assert ($audit -notmatch 'upload-artifact|upload-pages-artifact|cache@|SPO_|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID') 'Audit aggregate has an exposure path or borrows another app'
+Assert ($audit -match 'Invoke-CopilotAuditAggregate.ps1' -and $audit -match 'id-token: write' -and $audit -match "github.repository == 'aktsmm/m365-copilot-insights'") 'Audit aggregate entry or guard mismatch'
+$auditRun = Get-Content -LiteralPath (Join-Path $root 'scripts/Invoke-CopilotAuditAggregate.ps1') -Raw
+Assert ($auditRun -match "ExpectedRoles @\('AuditLogsQuery\.Read\.All'\)" -and $auditRun -match '-AggregateOnly') 'Audit aggregate must use the audit-only role and aggregate-only mode'
+Assert ($auditRun -notmatch 'userPrincipalName|\$r\.user\b') 'Audit aggregate must not print user identifiers'
 $pages = Get-Content -LiteralPath (Join-Path $flows 'synthetic-pages.yml') -Raw
 Assert ($pages -notmatch 'schedule:|TENANT_ID|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID|SPO_|Get-CopilotUsage|Get-CopilotCalendarProbe') 'Pages must not use private source'
 Assert ($pages -match 'Build-CopilotPublicPages.ps1' -and $pages -match 'workflow_dispatch:') 'Static Pages entry missing'
