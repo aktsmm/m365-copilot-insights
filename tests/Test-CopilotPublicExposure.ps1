@@ -16,6 +16,8 @@ foreach ($name in @('live-validation.yml','calendar-validation.yml')) {
     Assert ($text -match "github.repository == 'aktsmm/m365-copilot-insights'" -and $text -match "github.ref == 'refs/heads/main'") 'Backend ownership guard missing'
     Assert ($text -match 'group: copilot-private-publication') 'SPO writers must serialize across workflows'
 }
+$usage = Get-Content -LiteralPath (Join-Path $root 'scripts/Get-CopilotUsage.ps1') -Raw
+Assert ($usage -match "ExpectedRoles @\('Reports\.Read\.All','User\.Read\.All'\)") 'Collector must keep the exact least-privilege role set (Reports.Read.All, User.Read.All); extra Graph roles stop the pipeline, so use a separate app for other APIs'
 $pages = Get-Content -LiteralPath (Join-Path $flows 'synthetic-pages.yml') -Raw
 Assert ($pages -notmatch 'schedule:|TENANT_ID|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID|SPO_|Get-CopilotUsage|Get-CopilotCalendarProbe') 'Pages must not use private source'
 Assert ($pages -match 'Build-CopilotPublicPages.ps1' -and $pages -match 'workflow_dispatch:') 'Static Pages entry missing'
