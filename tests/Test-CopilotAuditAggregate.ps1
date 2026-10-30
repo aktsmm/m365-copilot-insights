@@ -1,6 +1,7 @@
 #Requires -Version 7.5
 # 監査ログ集計 (-AggregateOnly) の回帰テスト。Graph 応答を差し替え、ユーザー名が出力に出ないこと、件数と人数が正しいことを確認する。
 $ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
 $script = Join-Path (Split-Path $PSScriptRoot) 'scripts\Get-CopilotAuditSummary.ps1'
 $out = Join-Path ([IO.Path]::GetTempPath()) ("audit-agg-test-{0}.csv" -f [guid]::NewGuid())
 function Invoke-RestMethod {

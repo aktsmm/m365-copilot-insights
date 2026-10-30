@@ -28,7 +28,7 @@ $uri = "https://graph.microsoft.com/v1.0/security/auditLog/queries/$($q.id)/reco
 while ($uri) {
     $page = Invoke-RestMethod $uri -Headers $h
     foreach ($r in $page.value) { $records.Add($r) }
-    $uri = $page.'@odata.nextLink'
+    $uri = if ($page.PSObject.Properties.Name -contains '@odata.nextLink') { $page.'@odata.nextLink' } else { $null }
 }
 $rows = foreach ($r in $records) {
     $data = $r.auditData
