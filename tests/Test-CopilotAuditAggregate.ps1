@@ -13,7 +13,8 @@ function Invoke-RestMethod {
                 (& $mk 'userA' '2026-10-29' 'Office' ''),
                 (& $mk 'userA' '2026-10-29' 'Office' ''),
                 (& $mk 'userB' '2026-10-29' 'Office' ''),
-                (& $mk 'userB' '2026-10-29' 'Teams' 'Researcher')
+                (& $mk 'userB' '2026-10-29' 'Teams' 'Researcher'),
+                [pscustomobject]@{ userPrincipalName = 'userB'; createdDateTime = '2026-10-29T10:00:00Z'; auditData = [pscustomobject]@{ Operation = 'x' } }
             ) }
     }
     return [pscustomobject]@{ id = 'q1'; status = 'succeeded' }
@@ -25,6 +26,8 @@ try {
     if ($text -match 'userA|userB|userPrincipalName|"user"') { throw 'aggregate output must not contain user identifiers' }
     $rows = Import-Csv -LiteralPath $out
     $office = $rows | Where-Object { $_.appHost -eq 'Office' -and -not $_.agent }
+    $none = $rows | Where-Object { -not $_.appHost -and -not $_.agent }
+    if (-not $none -or $none.interactions -ne '1') { throw 'record without CopilotEventData must still be counted' }
     if ($office.interactions -ne '3' -or $office.distinctUsers -ne '2') { throw "Office aggregate wrong: $($office | ConvertTo-Json -Compress)" }
     $agent = $rows | Where-Object { $_.agent -eq 'Researcher' }
     if ($agent.interactions -ne '1' -or $agent.distinctUsers -ne '1') { throw 'agent aggregate wrong' }
