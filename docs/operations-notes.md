@@ -9,7 +9,7 @@ repository, not a fork or a copy of private Git history.
 ## Public data boundary
 
 `tests/fixtures/public-measured-monthly.json` is an approved, sanitized measured
-snapshot from a demonstration environment. Its names and UPNs are partially masked with *; department names are real. Numeric values, nulls, coverage, metric and dates are retained.
+snapshot from a demonstration environment. Its names and department names are real (fictional demo people); only the UPN domain is hidden. Numeric values, nulls, coverage, metric and dates are retained.
 `tests/fixtures/monthly-pages.cjs` and `exports/synthetic/summary.json` are independent
 synthetic fixtures, not additional measurements. The UI keeps measured actions,
 prompts, incomplete months and unknown values distinct. Unknown is never zero.

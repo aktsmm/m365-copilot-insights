@@ -10,9 +10,9 @@ const numericFields = ["count", "observedCount", "knownDays", "unknownDays", "st
 const rowFields = ["userId", "upn", "displayName", "department", ...numericFields];
 const pick = (source, fields) => Object.fromEntries(fields.map(key => [key, structuredClone(source[key])]));
 const numbered = (n, width) => String(n).padStart(width, "0");
-const maskWord = word => { const chars = [...word]; return chars[0] + "*".repeat(Math.max(1, chars.length - 1)); };
-const maskName = name => name.trim().split(/\s+/).map(maskWord).join(" ");
-const maskUpn = upn => maskWord(upn.split("@")[0]) + "@*****";
+
+const maskName = name => name.trim();
+const maskUpn = upn => upn.split("@")[0] + "@(domain hidden)";
 const publicDepartment = name => (!name || /unassigned|poc demo/i.test(name)) ? "未割り当て" : name;
 
 function assertPublic(payload) {
@@ -27,8 +27,8 @@ function assertPublic(payload) {
       const id = "demo-user-" + numbered(index + 1, 3);
       assert.deepEqual(Object.keys(row).sort(), [...rowFields].sort());
       assert.equal(row.userId, id);
-      assert.match(row.upn, /^[^\s@*]\*+@\*{5}$/, "UPN must be masked");
-      assert.match(row.displayName, /^[^\s*]\*+( [^\s*]\*+)*$/, "Display name must be masked");
+      assert.match(row.upn, /^[^\s@*]+@\(domain hidden\)$/, "UPN domain must be hidden");
+      assert.match(row.displayName, /^(?!.*[0-9a-f]{8}-[0-9a-f]{4})[^@*:\/]+$/i, "Display name must be a plain label");
       assert.match(row.department, /^(?!.*[0-9]{6,})[^@:\/]+$/, "Department must be a plain label");
     }
   }
@@ -84,7 +84,7 @@ function verify(source, output) {
   const serialized = JSON.stringify(output).toLocaleLowerCase();
   for (const month of source.months) {
     for (const row of month.rows) {
-      for (const field of ["userId", "upn", "displayName"]) {
+      for (const field of ["userId", "upn"]) {
         if (row[field]) assert(!serialized.includes(row[field].toLocaleLowerCase()), "Original identity or department text is not public");
       }
     }
@@ -95,7 +95,7 @@ function verify(source, output) {
     uniqueCounts: output.months.map(month => new Set(month.rows.map(row => row.userId)).size),
     checks: ["measured-values-identical", "coverage-arrays-identical", "metadata-identical",
       "row-and-unique-counts-identical", "department-grouping-identical",
-      "names-and-accounts-masked-departments-public-label", "management-identifiers-and-internal-urls-absent",
+      "account-domain-hidden-names-and-departments-public-label", "management-identifiers-and-internal-urls-absent",
       "canonical-fields-only", "tenant-dataclass-preserved"]
   };
 }

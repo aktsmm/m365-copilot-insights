@@ -2,7 +2,7 @@
 
 The measured entry uses only `tests/fixtures/public-measured-monthly.json`,
 whose reviewed public-payload SHA256 is checked by `Build-CopilotPublicPages.ps1`.
-Numbers, nulls, coverage, metric and dates retain their original meaning. Names and UPNs are partially masked with *; department names are real data. No GUID, tenant domain, URL or private source hash ships.
+Numbers, nulls, coverage, metric and dates retain their original meaning. Names and department names are real demo-tenant data (fictional people); only the UPN domain is hidden. No GUID, tenant domain, URL or private source hash ships.
 The sanitizer rebuilds allowlisted fields rather than copying unknown properties.
 
 `synthetic-pages.yml` is manual-only in `aktsmm/m365-copilot-insights`. Its Pages

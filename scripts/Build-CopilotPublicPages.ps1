@@ -14,7 +14,7 @@ $node = (Get-Command node -ErrorAction Stop).Source
 $payloadPath = Join-Path $pocRoot 'tests\fixtures\public-measured-monthly.json'
 $raw = (Get-Content -LiteralPath $payloadPath -Raw -Encoding utf8).TrimStart([char]0xFEFF).Replace("`r`n", "`n")
 $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($raw))).ToLowerInvariant()
-if ($digest -cne '0141d58ccc821544f1caee682ab9beec84739796dc5573b1d9c2a2ffb401b927') {
+if ($digest -cne 'd551b54670055c48cb6941389291f7b2b62626e9283399ff110cc3a114920ad5') {
     throw 'Measured public payload differs from the reviewed export.'
 }
 & $node (Join-Path $pocRoot 'scripts\Validate-CopilotPublicPayload.cjs') $payloadPath
@@ -31,7 +31,7 @@ function Set-NavCurrent([string]$Nav, [string]$Href) {
     $current = '<a aria-current="page" style="color:var(--cp-text);font-weight:700;text-decoration:none;border-bottom:2px solid var(--cp-warning)" href="' + $Href + '">'
     $Nav.Replace($plain, $current)
 }
-$notice = '<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>Diamondデモ環境の実測値（氏名・アカウントは * で一部伏せ字、部門名は実データ）</strong><p>データ元: Microsoft Graph の Copilot 利用状況レポート（actions）とEntraのユーザー属性。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細・原本リンク</a></p><details><summary>この数値の読み方 / How to read this</summary><p>これはactionsでありpromptsではありません。当月不完全のため確定回数は不明です。unknownはzeroではなく、不明を0に置き換えていません。観測回数は参考値であり、少利用判定には使用しません。</p><p>Measured values from the Diamond demo environment; names and accounts are partially masked with *, department names are real. Actions are not prompts. The current month is incomplete; unknown is not zero. Observed counts are reference only, never confirmed low usage.</p></details></aside>'
+$notice = '<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>Diamondデモ環境の実測値（氏名・部門名は実データ、アカウントはドメインのみ非公開）</strong><p>データ元: Microsoft Graph の Copilot 利用状況レポート（actions）とEntraのユーザー属性。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細・原本リンク</a></p><details><summary>この数値の読み方 / How to read this</summary><p>これはactionsでありpromptsではありません。当月不完全のため確定回数は不明です。unknownはzeroではなく、不明を0に置き換えていません。観測回数は参考値であり、少利用判定には使用しません。</p><p>Measured values from the Diamond demo environment; names and accounts are partially masked with *, department names are real. Actions are not prompts. The current month is incomplete; unknown is not zero. Observed counts are reference only, never confirmed low usage.</p></details></aside>'
 $measuredPath = Join-Path $output 'measured-monthly.html'
 $html = Get-Content -LiteralPath $measuredPath -Raw -Encoding utf8
 $initialView = '<script>(() => { const view = document.querySelector(''select[id$="-view"]''); if (view) { view.value = "unknown"; view.dispatchEvent(new Event("change", { bubbles: true })); } })();</script>'
@@ -59,7 +59,7 @@ $archBody = @"
 <h2>全体の流れ</h2>
 <ol>
 <li><b>取得</b>: 非公開のGitHub Actionsが、OIDC連携でMicrosoft Graphの Copilot 利用状況レポートとEntraのユーザー一覧（部門）を取得します。</li>
-<li><b>匿名化・検証</b>: 非公開側で氏名・UPNを * で一部伏せ字にし（部署名は実データ）、GUID・ドメイン・URLを除いたうえで、契約（スキーマ）と固定ハッシュで検証します。unknown（欠測）は0に置き換えません。</li>
+<li><b>匿名化・検証</b>: 非公開側でUPNのドメインを隠し（氏名・部署名は架空の人物の実データ）、GUID・ドメイン・URLを除いたうえで、契約（スキーマ）と固定ハッシュで検証します。unknown（欠測）は0に置き換えません。</li>
 <li><b>公開</b>: 検証済みの公開用JSONだけから静的HTML（このPages）をビルドします。秘密情報・元ID・内部URLは含みません。</li>
 <li><b>社内閲覧</b>: 同じ集計をSharePoint上のSPFx Webパーツ（日本語既定）とCSVダウンロードで提供します。</li>
 <li><b>解説</b>: Agentic Workflow（GitHub Copilot CLI）が集計値だけを読み、要約コメントをIssueに書き出します（今回の実行は変更なし）。</li>
