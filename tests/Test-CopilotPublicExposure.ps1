@@ -19,7 +19,7 @@ foreach ($name in @('live-validation.yml','calendar-validation.yml')) {
 $usage = Get-Content -LiteralPath (Join-Path $root 'scripts/Get-CopilotUsage.ps1') -Raw
 Assert ($usage -match "ExpectedRoles @\('Reports\.Read\.All','User\.Read\.All'\)") 'Collector must keep the exact least-privilege role set (Reports.Read.All, User.Read.All); extra Graph roles stop the pipeline, so use a separate app for other APIs'
 $audit = Get-Content -LiteralPath (Join-Path $flows 'audit-aggregate.yml') -Raw
-Assert ($audit -match 'workflow_dispatch:' -and $audit -notmatch 'schedule:|push:|pull_request:') 'Audit aggregate must be manual-only'
+Assert ($audit -match 'workflow_dispatch:' -and (([regex]::Matches($audit, '(?m)^\s+- cron:')).Count -eq 1) -and $audit -notmatch 'push:|pull_request:') 'Audit aggregate must be manual or a single daily schedule only'
 Assert ($audit -notmatch 'upload-artifact|upload-pages-artifact|cache@|SPO_|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID') 'Audit aggregate has an exposure path or borrows another app'
 Assert ($audit -match 'Invoke-CopilotAuditAggregate.ps1' -and $audit -match 'id-token: write' -and $audit -match "github.repository == 'aktsmm/m365-copilot-insights'") 'Audit aggregate entry or guard mismatch'
 $auditRun = Get-Content -LiteralPath (Join-Path $root 'scripts/Invoke-CopilotAuditAggregate.ps1') -Raw

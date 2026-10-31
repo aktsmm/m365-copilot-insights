@@ -1,6 +1,8 @@
 name: Audit aggregate collection
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '30 18 * * *'
 permissions: {}
 concurrency:
   group: copilot-audit-aggregate
