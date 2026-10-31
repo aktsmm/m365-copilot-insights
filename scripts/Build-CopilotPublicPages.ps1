@@ -14,7 +14,7 @@ $node = (Get-Command node -ErrorAction Stop).Source
 $payloadPath = Join-Path $pocRoot 'tests\fixtures\public-measured-monthly.json'
 $raw = (Get-Content -LiteralPath $payloadPath -Raw -Encoding utf8).TrimStart([char]0xFEFF).Replace("`r`n", "`n")
 $digest = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([Text.Encoding]::UTF8.GetBytes($raw))).ToLowerInvariant()
-if ($digest -cne 'fcb8cd64dfb5c763758ffe0b76189b82a9c660c613660f63fe931e5194d5b5a7') {
+if ($digest -cne 'e9e99e47935c30b2795992d439d8939c47005f11e87f50e9428fb7d8a2ccfa8a') {
     throw 'Measured public payload differs from the reviewed export.'
 }
 & $node (Join-Path $pocRoot 'scripts\Validate-CopilotPublicPayload.cjs') $payloadPath

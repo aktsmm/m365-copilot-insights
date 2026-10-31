@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "dataClass": "tenant",
-  "generatedAt": "2026-10-28T12:02:09.3270682+00:00",
+  "generatedAt": "2026-10-30T05:54:16.2041909+00:00",
   "months": [
     {
       "month": "2026-10",
@@ -10,7 +10,7 @@
       "metricLabelEn": "Copilot actions (not prompts)",
       "dateBasis": "UTC",
       "source": "graph-beta-usage-by-date",
-      "reportRefreshDate": "2026-10-26",
+      "reportRefreshDate": "2026-10-28",
       "coverage": {
         "expectedDates": [
           "2026-10-01",
@@ -47,12 +47,13 @@
         ],
         "availableDates": [
           "2026-10-20",
-          "2026-10-21",
           "2026-10-22",
           "2026-10-23",
           "2026-10-24",
           "2026-10-25",
-          "2026-10-26"
+          "2026-10-26",
+          "2026-10-27",
+          "2026-10-28"
         ],
         "missingDates": [
           "2026-10-01",
@@ -74,8 +75,7 @@
           "2026-10-17",
           "2026-10-18",
           "2026-10-19",
-          "2026-10-27",
-          "2026-10-28",
+          "2026-10-21",
           "2026-10-29",
           "2026-10-30",
           "2026-10-31"
@@ -90,8 +90,8 @@
           "department": "Contact Center & Sales Enablement",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -101,8 +101,8 @@
           "department": "Factory Ops & Field Service",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -112,8 +112,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -123,8 +123,8 @@
           "department": "Product Development",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -134,8 +134,8 @@
           "department": "Factory Ops & Field Service",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -145,8 +145,8 @@
           "department": "Marketing",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -156,8 +156,8 @@
           "department": "Technology",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -167,8 +167,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -178,8 +178,8 @@
           "department": "Executive Management",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -189,8 +189,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -200,8 +200,8 @@
           "department": "Financial",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -211,8 +211,8 @@
           "department": "Financial",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -222,8 +222,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -233,8 +233,8 @@
           "department": "Marketing",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -244,8 +244,8 @@
           "department": "Product Development",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -255,8 +255,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -266,8 +266,8 @@
           "department": "Security",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -277,8 +277,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -288,8 +288,8 @@
           "department": "Technology",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -299,8 +299,8 @@
           "department": "Security",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -310,8 +310,8 @@
           "department": "Technology",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -321,8 +321,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -332,8 +332,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -343,8 +343,8 @@
           "department": "Security",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -354,8 +354,8 @@
           "department": "Technology",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -365,8 +365,8 @@
           "department": "Technology",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -376,8 +376,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -387,8 +387,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -398,8 +398,8 @@
           "department": "Contact Center & Sales Enablement",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -409,8 +409,8 @@
           "department": "Product Development",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -420,8 +420,8 @@
           "department": "Contact Center & Sales Enablement",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -431,8 +431,8 @@
           "department": "Factory OPS & Field Service",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -442,8 +442,8 @@
           "department": "Sales",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -453,8 +453,8 @@
           "department": "Sales",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -464,8 +464,8 @@
           "department": "Product Development",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -475,8 +475,8 @@
           "department": "Financial",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -486,8 +486,8 @@
           "department": "Technology",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -497,8 +497,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -508,8 +508,8 @@
           "department": "Financial",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -519,8 +519,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -530,8 +530,8 @@
           "department": "Product Development",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -541,8 +541,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -552,8 +552,8 @@
           "department": "Contact Center & Sales Enablement",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -563,8 +563,8 @@
           "department": "Security",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -574,8 +574,8 @@
           "department": "未割り当て",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -585,8 +585,8 @@
           "department": "Sales",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -596,8 +596,8 @@
           "department": "Marketing",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -607,8 +607,8 @@
           "department": "Financial",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -618,8 +618,8 @@
           "department": "Sales",
           "count": null,
           "observedCount": 0,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         },
         {
@@ -628,9 +628,9 @@
           "displayName": "M** A************",
           "department": "未割り当て",
           "count": null,
-          "observedCount": 22,
-          "knownDays": 7,
-          "unknownDays": 24,
+          "observedCount": 5,
+          "knownDays": 8,
+          "unknownDays": 23,
           "status": "unknown"
         }
       ]
