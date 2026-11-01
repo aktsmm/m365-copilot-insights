@@ -10,7 +10,9 @@ function Assert([bool]$Condition,[string]$Message) {
 $flows = Join-Path $root '.github\workflows'
 foreach ($name in @('live-validation.yml','calendar-validation.yml')) {
     $text = Get-Content -LiteralPath (Join-Path $flows $name) -Raw
-    Assert ($text -match 'workflow_dispatch:' -and $text -notmatch 'schedule:|push:|pull_request:') 'Backend must be manual-only'
+    $crons = ([regex]::Matches($text, '(?m)^\s+- cron:')).Count
+    $cronOk = if ($name -eq 'calendar-validation.yml') { $crons -eq 1 } else { $crons -eq 0 }
+    Assert ($text -match 'workflow_dispatch:' -and $cronOk -and $text -notmatch 'push:|pull_request:') 'Backend must be manual-only, except the calendar collector with a single daily schedule'
     Assert ($text -notmatch 'upload-artifact|upload-pages-artifact|cache@|GITHUB_STEP_SUMMARY|Get-CopilotUsage|Get-CopilotCalendarProbe') 'Backend has a direct exposure path'
     Assert ($text -match 'Invoke-CopilotPrivateRun.ps1 -Mode (live|calendar)' -and $text -match 'id-token: write') 'Backend entry or permission mismatch'
     Assert ($text -match "github.repository == 'aktsmm/m365-copilot-insights'" -and $text -match "github.ref == 'refs/heads/main'") 'Backend ownership guard missing'

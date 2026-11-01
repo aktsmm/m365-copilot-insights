@@ -1,6 +1,8 @@
 name: Private calendar collection
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 21 * * *'
 permissions: {}
 concurrency:
   group: copilot-private-publication
