@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "dataClass": "tenant",
-  "generatedAt": "2026-10-31T02:06:40.6743539+00:00",
+  "generatedAt": "2026-11-02T00:18:07.1326072+00:00",
   "months": [
     {
       "month": "2026-10",
@@ -10,7 +10,7 @@
       "metricLabelEn": "Copilot actions (not prompts)",
       "dateBasis": "UTC",
       "source": "graph-beta-usage-by-date",
-      "reportRefreshDate": "2026-10-29",
+      "reportRefreshDate": "2026-10-30",
       "coverage": {
         "expectedDates": [
           "2026-10-01",
@@ -47,13 +47,13 @@
         ],
         "availableDates": [
           "2026-10-20",
-          "2026-10-23",
           "2026-10-24",
           "2026-10-25",
           "2026-10-26",
           "2026-10-27",
           "2026-10-28",
-          "2026-10-29"
+          "2026-10-29",
+          "2026-10-30"
         ],
         "missingDates": [
           "2026-10-01",
@@ -77,10 +77,10 @@
           "2026-10-19",
           "2026-10-21",
           "2026-10-22",
-          "2026-10-30",
+          "2026-10-23",
           "2026-10-31"
         ],
-        "status": "in-progress"
+        "status": "partial"
       },
       "rows": [
         {
@@ -144,7 +144,7 @@
           "displayName": "Cecil Folk",
           "department": "Marketing",
           "count": null,
-          "observedCount": 11,
+          "observedCount": 12,
           "knownDays": 8,
           "unknownDays": 23,
           "status": "unknown"
@@ -397,7 +397,7 @@
           "displayName": "Daniella Booker",
           "department": "Contact Center & Sales Enablement",
           "count": null,
-          "observedCount": 0,
+          "observedCount": 1,
           "knownDays": 8,
           "unknownDays": 23,
           "status": "unknown"
@@ -419,7 +419,7 @@
           "displayName": "Daisy Phillips",
           "department": "Contact Center & Sales Enablement",
           "count": null,
-          "observedCount": 0,
+          "observedCount": 1,
           "knownDays": 8,
           "unknownDays": 23,
           "status": "unknown"
@@ -430,7 +430,7 @@
           "displayName": "Colin Ballinger",
           "department": "Factory OPS & Field Service",
           "count": null,
-          "observedCount": 0,
+          "observedCount": 2,
           "knownDays": 8,
           "unknownDays": 23,
           "status": "unknown"
@@ -551,7 +551,7 @@
           "displayName": "Daniela Mandera",
           "department": "Contact Center & Sales Enablement",
           "count": null,
-          "observedCount": 0,
+          "observedCount": 1,
           "knownDays": 8,
           "unknownDays": 23,
           "status": "unknown"
