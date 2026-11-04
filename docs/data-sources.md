@@ -8,16 +8,16 @@
 | # | 情報 | 取得元・方式 | 自動化と表示先 |
 |---|---|---|---|
 | 1 | Copilot の最終利用日・利用者一覧 | Microsoft Graph v1.0 `getMicrosoft365CopilotUsageUserDetail`（CSV） | OIDC のアプリ認証で取得。日別の対象者を確保する取得口であり、D28 を暦月の回数に置換しない |
-| 2 | 日別アクション数 | Graph beta `getMicrosoft365CopilotUsageUserDetailByDate` の JSON `allAppsCopilotActionCount` | 通常 Actions が毎日 06:00 / 18:00 JST に収集、履歴を月次集計し非公開 SharePoint へ保存 |
+| 2 | 日別アクション数 | Graph beta `getMicrosoft365CopilotUsageUserDetailByDate` の JSON `allAppsCopilotActionCount` | 通常 Actions で毎日 06:00 / 18:00 JST に定期収集する設定。履歴を月次集計し非公開 SharePoint へ保存。実際の起動・成功は [README](../README.md) を参照 |
 | 3 | 日別プロンプト数 | 同じ beta API の CSV 列 `Prompts submitted for All Apps` | ブラウザの CSV ダウンロードではなく API 応答。アクション数とは別系列で取り込む |
 | 4 | 氏名・UPN・部署 | Graph `users` の `displayName` / `userPrincipalName` / `department` | 利用レポートと突合。部門は取得時点の属性で、異動前を復元するものではない |
 | 5 | 取得日・欠測日・観測回数・確定回数 | 上記の日別履歴をスクリプトで検査・合算 | 取得できた日だけが観測回数。月が終了し全日分を取得した場合のみ確定。欠測はゼロにしない |
 | 6 | 公開 Pages の実測値 | 承認・加工済み `tests/fixtures/public-measured-monthly.json` | ハッシュと契約を検査した静的スナップショット。ライブ収集から公開への自動更新はない |
 | 7 | 完全合成デモ | リポジトリの合成フィクスチャと `exports/synthetic` | 実測とは別入口。テスト用で、顧客やテナントの実績ではない |
-| 8 | 日・アプリ・エージェント別の Copilot 監査操作件数・利用者数 | Purview 監査ログを Graph auditLog queries から専用アプリ / OIDC で取得 | 毎日 03:30 JST に無人集計。公開 Actions ログでは `Researcher`・`Analyst`・`Planner Agent` だけを表示し、その他の名前は集約、未記録は別扱い。監査の操作件数・利用者数であり、Viva のセッション数などとは別。月次 Pages の値には加えない |
+| 8 | 日・アプリ・エージェント別の Copilot 監査操作件数・利用者数 | Purview 監査ログを Graph auditLog queries から専用アプリ / OIDC で取得 | 毎日 03:30 JST に無人集計する設定。公開 Actions ログでは `Researcher`・`Analyst`・`Planner Agent` だけを表示し、その他の名前は集約、未記録は別扱い。監査の操作件数・利用者数であり、Viva のセッション数などとは別。月次 Pages の値には加えない |
 | 9 | Viva の Copilot / エージェント CSV | Viva Insights のログイン済み画面のエクスポート | ブラウザ操作で取得済み。GitHub 単体の無人取得は未実装。月次 Pages の値には加えない |
 | 10 | AI 解説 | 公開用実測値を部門・月・指標別に決定論的に集計した `measured-aggregate.json` | 手動起動の `measured-commentary` が集計だけを読み、正式な安全出力と集計の一致を検査後に Pages が自動配備。氏名・UPN・個票・ライブ原本を AI 入力にしない |
-| 11 | 障害 Issue | Actions API の実行結果とワークフロー定義済みのジョブ名・ステップ名 | 失敗 / タイムアウトで自動記録。ログ本文や Graph 応答は読まない。原因究明・自動修復は別作業 |
+| 11 | 障害 Issue | Actions API の実行結果とワークフロー定義済みのジョブ名・ステップ名 | 失敗 / タイムアウトで自動記録する設定。実失敗イベントでの発火は未検証で、未起動は検出できない。ログ本文や Graph 応答は読まない。原因究明・自動修復は別作業 |
 | 12 | M365 メッセージセンターの通知 | 本リポジトリには収集処理なし。[別プロジェクト](https://github.com/aktsmm/m365-message-center-dashboard)では Graph と通常の GitHub Actions で定期収集 | [別の通知ページ](https://aktsmm.github.io/m365-message-center-dashboard/)に公開。AI 要約は別工程。管理センターの利用状況レポートとは異なり、この月次ページには含めない |
 
 「Copilot アクション」は各アプリでの Copilot 操作を表す指標、

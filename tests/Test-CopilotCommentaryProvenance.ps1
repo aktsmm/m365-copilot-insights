@@ -231,6 +231,8 @@ try {
     $architecture = Get-Content -LiteralPath (Join-Path $site 'architecture.html') -Raw -Encoding utf8
     Assert-Condition ($architecture.Contains('https://aktsmm.github.io/m365-message-center-dashboard/') -and
         $architecture.Contains('この月次グラフには含めない')) 'separate Message Center source is linked without implying merged metrics'
+    Assert-Condition ($architecture.Contains('実失敗イベントでの発火は未検証') -and
+        $architecture.Contains('定期実行そのものの未起動は検出できません')) 'failure recorder limitations are disclosed'
     $sourcesTable = [regex]::Match($architecture, '(?s)<table>.*?</table>').Value
     $sourceNumbers = @([regex]::Matches($sourcesTable, '<tr><td>(\d+)</td>') |
         ForEach-Object { $_.Groups[1].Value })
