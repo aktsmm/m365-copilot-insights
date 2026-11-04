@@ -78,7 +78,8 @@ PAT の値はチャットやログに貼らず、クリップボードから直�
 ### 1-4. Viva Insights を使う場合
 
 - Viva Insights の Analyst ロールが必要です。
-- Viva の自動取得は**このサンプルでは未達**です（Partition ID・Query ID・公式コネクタでの取得を確認できていません）。
+- Copilot / エージェントの CSV はログイン済み画面から取得できます。同じ CSV を直接取得する公開 API は確認できていないため、現在の GitHub Actions だけでは無人取得できません。
+- 高度分析から Fabric Dataflow Gen2 / Copy job へ連携する公式の別経路がありますが、このサンプルでは未接続です。画面 CSV と同じ項目を取れるかも未確認で、Partition ID・Query ID・ワークスペース容量などの条件確認が必要です。取得元と再開条件は[データ対応表](data-sources.md#viva-をクラウドで自動取得できるか)を参照してください。
 
 ## 2. 手順
 

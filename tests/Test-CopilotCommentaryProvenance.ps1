@@ -244,6 +244,11 @@ try {
     Assert-Condition ($readme.Contains('Viva ダッシュボードの同じ CSV を直接取得する公開 API を確認できず') -and
         $readme.Contains('現在の Actions だけでは無人取得できない') -and
         $readme.Contains('画面 CSV と同じ項目かも未確認')) 'README explains the Viva CSV and Fabric blockers'
+    $setupGuide = Get-Content -LiteralPath (Join-Path $root 'docs\setup-guide.md') -Raw -Encoding utf8
+    Assert-Condition ($setupGuide.Contains('同じ CSV を直接取得する公開 API は確認できていない') -and
+        $setupGuide.Contains('現在の GitHub Actions だけでは無人取得できません') -and
+        $setupGuide.Contains('このサンプルでは未接続です') -and
+        $setupGuide.Contains('画面 CSV と同じ項目を取れるかも未確認')) 'setup guide explains the Viva and Fabric blockers'
     $sourcesTable = [regex]::Match($architecture, '(?s)<table>.*?</table>').Value
     $sourceNumbers = @([regex]::Matches($sourcesTable, '<tr><td>(\d+)</td>') |
         ForEach-Object { $_.Groups[1].Value })
