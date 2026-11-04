@@ -114,8 +114,8 @@ $archBody = @"
 <tr><td>1</td><td>M365 管理センター &gt; レポート &gt; Microsoft 365 Copilot</td><td>Graph Copilot利用状況レポート（v1.0 CSV）をGitHub ActionsがOIDCで無人取得</td><td>自動取得済み</td></tr>
 <tr><td>2</td><td>同 日別</td><td>Graph beta 日別（最新更新日の7日前から）を蓄積</td><td>窓外は復元不可</td></tr>
 <tr><td>3</td><td>部門（Entraユーザー属性）</td><td>Graph users（department）をUPNで突合</td><td>自動取得済み</td></tr>
-<tr><td>4</td><td>Viva Insights Copilot / エージェントダッシュボード</td><td>ログイン済みブラウザからCSVをエクスポート。公開APIでの取得は確認できていない</td><td>画面操作で取得済み。GitHubだけの無人取得は未実装。この月次グラフには含めない</td></tr>
-<tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td><td>公式にFabric Dataflow Gen2の定期更新とCopy jobがある（Partition ID・Query ID・容量が必要）</td><td>本テナントは11/4も分析結果ページに到達不可。未接続・追加費用未承認。クラウド自動化そのものが不可能という意味ではない</td></tr>
+<tr><td>4</td><td>Viva Insights Copilot / エージェントダッシュボード</td><td>ログイン済みブラウザで画面からCSVをエクスポート</td><td>同じCSVを直接取得する公開APIを確認できず、現在のGitHub Actionsだけでは無人取得できない。画面からは取得済み。この月次グラフには含めない</td></tr>
+<tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td><td>公式にFabric Dataflow Gen2の定期更新とCopy jobがある（Partition ID・Query ID・容量が必要）</td><td>本テナントは11/4も分析結果ページに到達不可。未接続・追加費用未承認。画面CSVと同じ項目かは未確認で、クラウド自動化そのものが不可能という意味ではない</td></tr>
 <tr><td>6</td><td>Purview監査ログ</td><td>Graph auditLog queriesを専用アプリのOIDCで取得し、日・アプリ・エージェント別に件数と利用者数を集計</td><td>毎日03:30 JSTに定期設定。公開ログはResearcher・Analyst・Planner Agentのみ表示し、他の名前は「その他」、未記録は別扱い。Vivaのセッション数とは別で、この月次グラフには含めない</td></tr>
 <tr><td>7</td><td>M365メッセージセンター</td><td>本リポジトリでは対象外。<a href="https://github.com/aktsmm/m365-message-center-dashboard">別プロジェクト</a>がGraphと通常のGitHub Actionsで定期収集</td><td><a href="https://aktsmm.github.io/m365-message-center-dashboard/">別の通知ページ</a>へ公開。AI要約は別工程。この月次グラフには含めない</td></tr>
 </tbody></table>
