@@ -40,6 +40,8 @@ foreach ($path in @('scripts/Publish-CopilotMonthly.ps1','scripts/Publish-Copilo
     $text = Get-Content -LiteralPath (Join-Path $root $path) -Raw
     Assert ($text -match 'repo-\$env:GITHUB_REPOSITORY_ID-\$env:GITHUB_RUN_ID-\$env:GITHUB_RUN_ATTEMPT') 'New writes require repository-ID namespace'
 }
+$failure = Get-Content -LiteralPath (Join-Path $flows 'record-collection-failure.yml') -Raw
+Assert ($failure -match 'workflow_run:' -and $failure -notmatch 'id-token:|upload-artifact|cache@|GITHUB_STEP_SUMMARY|SPO_|TENANT_ID|CLIENT_ID|run-logs|/logs' -and $failure -match 'issues: write' -and $failure -notmatch 'contents: write') 'Failure recorder must use names only and no private capability'
 $commentary = Get-Content -LiteralPath (Join-Path $flows 'synthetic-commentary.lock.yml') -Raw
 Assert ($commentary -notmatch 'id-token:|TENANT_ID|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID|SPO_') 'Agentic workflow has a private data capability'
 Assert ($commentary -notmatch '(?m)^  schedule:') 'Agentic must be manual-only'
