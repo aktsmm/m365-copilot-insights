@@ -240,6 +240,10 @@ try {
     $fabricRow = [regex]::Match($architecture, '(?s)<tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td>.*?</tr>').Value
     Assert-Condition ($fabricRow.Contains('分析結果ページに到達不可') -and
         $fabricRow.Contains('画面CSVと同じ項目かは未確認')) 'Fabric is distinguished from the dashboard export'
+    $readme = Get-Content -LiteralPath (Join-Path $root 'README.md') -Raw -Encoding utf8
+    Assert-Condition ($readme.Contains('Viva ダッシュボードの同じ CSV を直接取得する公開 API を確認できず') -and
+        $readme.Contains('現在の Actions だけでは無人取得できない') -and
+        $readme.Contains('画面 CSV と同じ項目かも未確認')) 'README explains the Viva CSV and Fabric blockers'
     $sourcesTable = [regex]::Match($architecture, '(?s)<table>.*?</table>').Value
     $sourceNumbers = @([regex]::Matches($sourcesTable, '<tr><td>(\d+)</td>') |
         ForEach-Object { $_.Groups[1].Value })
