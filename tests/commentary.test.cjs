@@ -52,3 +52,11 @@ test('render separates computed evidence and AI text, escapes content and links 
   assert.match(render(summary, null), /AI 解説がありません/);
   assert.throws(() => render(summary, value, '123?malicious'));
 });
+test('artifact reader follows the compiled runtime artifact contract, not an agent-selected name', () => {
+  const reader = fs.readFileSync(path.join(__dirname, '../scripts/Get-CopilotCommentaryArtifact.ps1'), 'utf8');
+  const compiled = fs.readFileSync(path.join(__dirname, '../.github/workflows/measured-commentary.lock.yml'), 'utf8');
+  assert.match(reader, /\$artifactName = 'safe-outputs-upload-artifacts'/);
+  assert.match(compiled, /name: safe-outputs-upload-artifacts/);
+  assert.match(reader, /files.Count -ne 1/);
+  assert.match(reader, /head_repository.full_name -cne \$repo/);
+});

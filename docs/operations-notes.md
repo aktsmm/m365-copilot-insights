@@ -53,7 +53,9 @@ department / month / metric totals from the reviewed public fixture. It strips
 user IDs, names and UPNs before the model reads `exports/measured-aggregate.json`.
 The original private source and live APIs are never model inputs.
 
-The model uploads one `measured-commentary` artifact containing `commentary.json`.
+The model stages `commentary.json` through `upload_artifact`. The installed gh-aw
+compiler exposes it as the fixed `safe-outputs-upload-artifacts` artifact; this
+is the runtime contract verified on the cloud run, not an agent-chosen artifact name.
 The separate Pages workflow runs after successful inference, checks the originating
 repository / workflow / branch, bounded artifact size, strict keys and source digest,
 then HTML-escapes the short Japanese text. All numeric evidence is computed by
@@ -70,6 +72,12 @@ Pages content remains until a successful replacement deployment.
 The public page links to the aggregate input, AI JSON and inference run. Only the
 public aggregate artifact is downloaded; never download backend artifacts or logs.
 Source: https://github.github.com/gh-aw/reference/safe-outputs/#artifact-uploads-upload-artifact
+
+The first integration run produced valid inference but Pages refused publication:
+the current tool accepts a file path and did not create an agent-named artifact.
+The downloader now selects only the compiler's fixed artifact, checks its single
+root file, and rejects other output artifacts. Do not equate an overall inference
+run success with downstream publication success.
 
 Private backend workflows require repository variables `TENANT_ID`,
 `COLLECTOR_CLIENT_ID`, `PUBLISHER_CLIENT_ID`, `SPO_SITE_ID`, `SPO_LIBRARY_ID`,

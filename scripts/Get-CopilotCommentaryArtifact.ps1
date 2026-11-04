@@ -25,12 +25,13 @@ if ($run.name -cne 'Measured aggregate commentary' -or $run.head_branch -cne 'ma
     throw 'Untrusted commentary workflow run'
 }
 $artifacts = Read-GitHubJson "repos/$repo/actions/runs/$RunId/artifacts?per_page=100"
-$matches = @($artifacts.artifacts | Where-Object { $_.name -ceq 'measured-commentary' -and -not $_.expired })
+$artifactName = 'safe-outputs-upload-artifacts'
+$matches = @($artifacts.artifacts | Where-Object { $_.name -ceq $artifactName -and -not $_.expired })
 if ($matches.Count -ne 1 -or $matches[0].size_in_bytes -gt 32768) {
     throw 'Expected one bounded, unexpired commentary artifact'
 }
 if (Test-Path -LiteralPath $OutputDirectory) { throw 'Commentary output directory must be fresh' }
-& gh run download $RunId -R $repo -n measured-commentary -D $OutputDirectory
+& gh run download $RunId -R $repo -n $artifactName -D $OutputDirectory
 if ($LASTEXITCODE -ne 0) { throw 'Commentary artifact download failed' }
 $files = @(Get-ChildItem -LiteralPath $OutputDirectory -File -Recurse)
 if ($files.Count -ne 1 -or $files[0].Name -cne 'commentary.json' -or $files[0].Length -gt 16384) {

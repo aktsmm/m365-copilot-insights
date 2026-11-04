@@ -42,8 +42,10 @@ infer adoption, ROI, causality, improvement, individual performance or rankings.
 If there are no available days, say that usage cannot be assessed.
 Do not suggest reauthentication or changing permissions without evidence.
 
-Use the `upload_artifact` safe-output tool to upload `output/commentary.json` as
-an artifact named exactly `measured-commentary`. Do not end with noop if a valid
+Use the `upload_artifact` safe-output tool to upload `output/commentary.json`.
+The installed compiler stages it in the `safe-outputs-upload-artifacts` artifact;
+the tool's input is a path, not a configurable artifact name.
+Do not end with noop if a valid
 input exists. If input is missing/invalid, report missing data instead of inventing
 an interpretation. A separate Pages workflow validates the artifact and input
 digest, escapes the text, and publishes it alongside the deterministic table.
