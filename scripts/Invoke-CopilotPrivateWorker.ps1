@@ -4,9 +4,9 @@ param([Parameter(Mandatory)][ValidateSet('live','calendar')][string]$Mode)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 function Get-CalendarMonths([string]$RefreshDate) {
-    # Include the previous month so a month rollover keeps the finished month current and never leaves the new month without snapshots.
+    # The by-date source window reaches 7 days back, so the months of both ends can still change.
     $d = [datetime]::ParseExact($RefreshDate, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture)
-    @($d.AddMonths(-1).ToString('yyyy-MM'), $d.ToString('yyyy-MM')) | Where-Object { $_ -ge '2026-10' }
+    @($d.AddDays(-7).ToString('yyyy-MM'), $d.ToString('yyyy-MM')) | Select-Object -Unique
 }
 $common = @{
     TenantId=$env:TENANT_ID; PublisherClientId=$env:PUBLISHER_CLIENT_ID

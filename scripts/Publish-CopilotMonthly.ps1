@@ -85,7 +85,7 @@ try {
         $month = $payload.months[0]
         $restoreArgs = @{
             Request=$request; OutputDirectory=(Join-Path (Split-Path $OutputPath) 'restored-current')
-            Months=@($payload.months.month); ExpectedSource=$month.source; ExpectedMetricId=$month.metricId
+            Months=@($payload.months | ForEach-Object { $_.month } | Select-Object -Unique); ExpectedSource=$month.source; ExpectedMetricId=@($payload.months | ForEach-Object { $_.metricId } | Select-Object -Unique)
             ExpectedDateBasis=$month.dateBasis; DataClass='tenant'
             AsOfDate=([DateTimeOffset]::Parse($payload.generatedAt).UtcDateTime.ToString('yyyy-MM-dd'))
             GeneratedAt=$payload.generatedAt

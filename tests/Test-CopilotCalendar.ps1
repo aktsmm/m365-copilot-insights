@@ -123,6 +123,12 @@ try {
     # Month rollover: a new month with no selected day still reports the series refresh date, so the dashboard payload stays valid.
 $roll=Get-Payload @((New-Snapshot '2024-02-01' 3)) @('2024-02','2024-03') '2026-10-28'
 Assert-True ($roll.months.Count -eq 2 -and $roll.months[1].coverage.availableDates.Count -eq 0 -and -not [string]::IsNullOrEmpty([string]$roll.months[1].reportRefreshDate)) 'An empty rollover month must keep a valid reportRefreshDate.'
+# Two metrics (JSON actions and CSV prompts) coexist as separate series for the same months.
+$act=New-Snapshot '2024-02-01' 3
+$act.metricId='all-apps-actions'; $act.metricLabelJa='Copilotアクション数'; $act.metricLabelEn='Copilot actions'
+$two=Get-Payload @($act,(New-Snapshot '2024-02-02' 5)) @('2024-02') '2026-10-28'
+Assert-True ($two.months.Count -eq 2 -and ((@($two.months | ForEach-Object { $_.metricId } | Sort-Object) -join ',') -ceq 'all-apps-actions,all-apps-prompts')) 'Actions and prompts must be emitted as separate month entries.'
+Assert-True (((@($two.months | ForEach-Object { $_.coverage.availableDates.Count })) -join ',') -ceq '1,1') 'Each metric keeps only its own days.'
 $p=Get-CopilotMonthlyPayload -Snapshots @() -Months @('2024-02') -EmptyMetadata (New-Snapshot) -AsOfDate '2026-10-28'
     Assert-True ($p.months[0].coverage.availableDates.Count -eq 0 -and $null -eq $p.months[0].reportRefreshDate -and $null -eq $p.months[0].rows[1].count) 'Empty declaration never becomes observed success'
     $huge=@(New-Month '2024-02'); $huge[0].users[0].count=9007199254740991L

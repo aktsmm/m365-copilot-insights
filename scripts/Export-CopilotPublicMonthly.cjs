@@ -22,7 +22,7 @@ function assertPublic(payload) {
   for (const month of payload.months) {
     assert.deepEqual(Object.keys(month).sort(), [...monthFields, "coverage", "rows"].sort());
     assert.deepEqual(Object.keys(month.coverage).sort(), [...coverageFields].sort());
-    assert.equal(month.metricId, "all-apps-actions", "This public approval is for observed actions, not prompts");
+    assert(["all-apps-actions", "all-apps-prompts"].includes(month.metricId), "This public approval covers the observed Copilot actions and prompts series only");
     for (const [index, row] of month.rows.entries()) {
       const id = "demo-user-" + numbered(index + 1, 3);
       assert.deepEqual(Object.keys(row).sort(), [...rowFields].sort());

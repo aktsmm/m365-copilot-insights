@@ -68,18 +68,35 @@ $summary = @{
     runtimeApplicationVerified = [bool]$UseActions
     rosterPeriod = $rosterPeriod; stableRows = $rows.Count; reportRefreshDate = $refresh.ToString('yyyy-MM-dd')
     allAppsPromptMetricAvailable = $false
-    reason = '日別APIの全アプリ指標はactions。stableの送信プロンプト数とは異なるため暦月プロンプトとして代用しない。'
+    reason = '日別APIはJSON（actions）またはCSV（prompts）で応答する。actionsとpromptsは別指標として保存し、互いに代用しない。'
     days = @()
 }
 foreach ($offset in -7..0) {
     $date = $refresh.AddDays($offset).ToString('yyyy-MM-dd')
     $reply = Invoke-CopilotGraph -Uri "https://graph.microsoft.com/beta/copilot/reports/getMicrosoft365CopilotUsageUserDetailByDate(date=$date)" -Token $token -AllowError
     $probe = @{ date = $date; status = $reply.Status; errorCode = $reply.ErrorCode }
-    # A 200 reply with a non-JSON body (the service has returned CSV) is treated as an unavailable day, never as zero.
-    if ($reply.Status -eq 200 -and -not "$($reply.Text)".TrimStart().StartsWith('{')) { $probe.status = 0; $probe.errorCode = 'non-json-body' }
+    # The by-date endpoint has answered both JSON (actions) and CSV (prompts). Both are supported as separate metrics; any other 200 body is an unavailable day, never zero.
+    $body = "$($reply.Text)".TrimStart([char]0xFEFF).TrimStart()
+    $format = if ($body.StartsWith('{')) { 'json' } elseif ($body.StartsWith('Report Refresh Date')) { 'csv' } else { 'unknown' }
+    if ($reply.Status -eq 200 -and $format -eq 'unknown') { $probe.status = 0; $probe.errorCode = 'unsupported-body' }
     elseif ($reply.Status -eq 200) {
-        $daily = $reply.Text | ConvertFrom-Json -AsHashtable
-        [IO.File]::WriteAllText((Join-Path $output "raw-$date.json"), $reply.Text, $utf8)
+        if ($format -eq 'json') {
+            $daily = $body | ConvertFrom-Json -AsHashtable
+            $metric = @{ id = 'all-apps-actions'; ja = 'Copilotアクション数（プロンプト数とは異なる）'; en = 'Copilot actions (not prompts)'; key = 'allAppsCopilotActionCount' }
+        } else {
+            $csvRows = @($body | ConvertFrom-Csv)
+            foreach ($column in @('Report Refresh Date', 'Report Selected Date', 'User Principal Name', 'Prompts submitted for All Apps')) {
+                if ($csvRows.Count -eq 0 -or -not $csvRows[0].PSObject.Properties.Name.Contains($column)) { throw 'Daily CSV schema changed.' }
+            }
+            $daily = @{ value = @(foreach ($csvRow in $csvRows) {
+                $promptText = "$($csvRow.'Prompts submitted for All Apps')".Trim()
+                $promptValue = $null
+                if ($promptText -ne '') { $parsed = 0L; if ([long]::TryParse($promptText, [ref]$parsed) -and $parsed -ge 0) { $promptValue = $parsed } else { throw 'Daily CSV count is not a nonnegative integer.' } }
+                @{ userPrincipalName = $csvRow.'User Principal Name'; reportSelectedDate = $csvRow.'Report Selected Date'; reportRefreshDate = $csvRow.'Report Refresh Date'; allAppsCopilotPromptCount = $promptValue }
+            }) }
+            $metric = @{ id = 'all-apps-prompts'; ja = 'Copilotプロンプト数（アクション数とは異なる）'; en = 'Copilot prompts (not actions)'; key = 'allAppsCopilotPromptCount' }
+        }
+        [IO.File]::WriteAllText((Join-Path $output "raw-$date.json"), ($daily | ConvertTo-Json -Depth 8), $utf8)
         $seen = @{}
         foreach ($row in $daily.value) {
             $upn = $row.userPrincipalName.ToLowerInvariant()
@@ -94,8 +111,8 @@ foreach ($offset in -7..0) {
                 $person = $index[$upn]
                 $count = $null
                 if ($seen.ContainsKey($upn)) {
-                    if (-not $seen[$upn].ContainsKey('allAppsCopilotActionCount')) { throw 'Daily actions schema changed.' }
-                    $count = $seen[$upn].allAppsCopilotActionCount
+                    if (-not $seen[$upn].ContainsKey($metric.key)) { throw 'Daily count schema changed.' }
+                    $count = $seen[$upn][$metric.key]
                 }
                 @{
                     userId = $person.id; upn = $upn; displayName = $person.displayName
@@ -105,8 +122,8 @@ foreach ($offset in -7..0) {
         )
         $snapshot = @{
             schemaVersion = 1; dataClass = 'tenant'; source = 'graph-beta-usage-by-date'
-            metricId = 'all-apps-actions'; metricLabelJa = 'Copilotアクション数（プロンプト数とは異なる）'
-            metricLabelEn = 'Copilot actions (not prompts)'; dateBasis = 'UTC'
+            metricId = $metric.id; metricLabelJa = $metric.ja
+            metricLabelEn = $metric.en; dateBasis = 'UTC'
             selectedDate = $date; reportRefreshDate = $refresh.ToString('yyyy-MM-dd')
             collectedAt = [DateTime]::UtcNow.ToString('o'); collectionComplete = ($seen.Count -eq $rows.Count)
             users = $mapped
@@ -115,9 +132,10 @@ foreach ($offset in -7..0) {
         [void][IO.Directory]::CreateDirectory($snapshots)
         [IO.File]::WriteAllText((Join-Path $snapshots "$date.json"), ($snapshot | ConvertTo-Json -Depth 15), $utf8)
         $probe.rows = $seen.Count
+        $probe.metricId = $metric.id
         $probe.fields = @(if ($daily.value.Count -gt 0) { $daily.value[0].Keys | Sort-Object })
-    }
-    $summary.days += @($probe)
+    }    $summary.days += @($probe)
 }
+$summary.allAppsPromptMetricAvailable = [bool]@($summary.days | Where-Object { $_.ContainsKey('metricId') -and $_.metricId -eq 'all-apps-prompts' }).Count
 [IO.File]::WriteAllText((Join-Path $output 'probe-summary.json'), ($summary | ConvertTo-Json -Depth 12), $utf8)
 $summary | ConvertTo-Json -Depth 12 -Compress

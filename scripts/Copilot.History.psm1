@@ -60,7 +60,7 @@ function Restore-CopilotMonthlyHistory {
         [Parameter(Mandatory)][string]$OutputDirectory,
         [Parameter(Mandatory)][string[]]$Months,
         [Parameter(Mandatory)][string]$ExpectedSource,
-        [Parameter(Mandatory)][string]$ExpectedMetricId,
+        [Parameter(Mandatory)][string[]]$ExpectedMetricId,
         [Parameter(Mandatory)][string]$ExpectedDateBasis,
         [Parameter(Mandatory)][ValidateSet('tenant','synthetic')][string]$DataClass,
         [Parameter(Mandatory)][string]$AsOfDate,
@@ -69,7 +69,7 @@ function Restore-CopilotMonthlyHistory {
         [string[]]$RunKeys
     )
     $directory=Assert-HistoryOutput $OutputDirectory
-    foreach ($value in @($ExpectedSource,$ExpectedMetricId,$ExpectedDateBasis)) {
+    foreach ($value in (@($ExpectedSource) + @($ExpectedMetricId) + @($ExpectedDateBasis))) {
         if ([string]::IsNullOrWhiteSpace($value)) { throw 'Expected source, metric and date basis must be explicit.' }
     }
     $listing=ConvertFrom-HistoryJson (Read-HistoryResponse $Request '/root:/CopilotMonthlyRaw:/children').Bytes
@@ -121,7 +121,7 @@ function Restore-CopilotMonthlyHistory {
             foreach ($field in @('source','metricId','dateBasis','dataClass','selectedDate')) {
                 if (-not $snapshot.Contains($field)) { throw "Snapshot missing $field." }
             }
-            if ($snapshot.source -cne $ExpectedSource -or $snapshot.metricId -cne $ExpectedMetricId -or
+            if ($snapshot.source -cne $ExpectedSource -or $snapshot.metricId -cnotin $ExpectedMetricId -or
                 $snapshot.dateBasis -cne $ExpectedDateBasis -or $snapshot.dataClass -cne $DataClass -or $snapshot.selectedDate -cne $date) {
                 throw 'Snapshot provenance or selectedDate mismatch.'
             }
