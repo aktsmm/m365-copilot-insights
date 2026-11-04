@@ -40,6 +40,14 @@ Unknown is not zero; an observed zero is not proof of no use during missing days
 Actions and prompts are different metrics; do not compare or add them. Do not
 infer adoption, ROI, causality, improvement, individual performance or rankings.
 If there are no available days, say that usage cannot be assessed.
+`missingDays` includes dates after `reportRefreshDate`; these are not evidence of
+an outage. `afterRefreshDays`, `expiredMissingDays` and `recoverableMissingDays`
+separate future-report dates, expired gaps and gaps still in the retrieval window.
+Unsaved gaps older than seven days before refresh cannot be recovered by waiting
+or retrying. Never recommend waiting to fill the whole historical month.
+For a series with expired gaps, explicitly say that expired unsaved dates cannot
+be recovered. Recommend reacquisition only for gaps still inside the window,
+or continued collection of future reports; do not compare series even by coverage.
 Do not suggest reauthentication or changing permissions without evidence.
 
 Use the `upload_artifact` safe-output tool to upload `output/commentary.json`.

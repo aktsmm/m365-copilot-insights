@@ -61,6 +61,9 @@ repository / workflow / branch, bounded artifact size, strict keys and source di
 then HTML-escapes the short Japanese text. All numeric evidence is computed by
 scripts; prose cannot contain numeric digits. Interpretation is labelled AI-generated,
 not an official report, individual assessment, or proof of adoption.
+The aggregate separates dates after the report refresh from expired unsaved gaps
+and still-retrievable gaps. Missing days include future-report dates; do not
+describe all of them as outages or promise that an expired month can be recovered.
 
 Manual Pages dispatch reuses the latest successful inference artifact. Before the
 first inference it explicitly shows no AI prose. Missing / expired artifacts,

@@ -15,6 +15,7 @@ test('aggregate matches source totals per department and removes all personal fi
     const source = payload.months.find(m => `${m.month}/${m.metricId}` === series.id);
     assert.equal(series.observedTotal, series.availableDays ? source.rows.reduce((sum, r) => sum + r.observedCount, 0) : null);
     assert.equal(series.people, source.rows.length);
+    assert.equal(series.afterRefreshDays + series.expiredMissingDays + series.recoverableMissingDays, series.missingDays);
     for (const group of series.departments) {
       assert.deepEqual(Object.keys(group).sort(), allowed.sort());
       const rows = source.rows.filter(r => (r.department || '(department unknown)') === group.department);
@@ -48,6 +49,8 @@ test('render separates computed evidence and AI text, escapes content and links 
   const html = render(summary, value, '123');
   assert.match(html, /A &amp; B/);
   assert.match(html, /AI による参考解釈/);
+  assert.match(html, /取得窓外の未保存日は復元できず/);
+  assert.match(html, /基準日後を含む/);
   assert.match(html, /actions\/runs\/123/);
   assert.match(render(summary, null), /AI 解説がありません/);
   assert.throws(() => render(summary, value, '123?malicious'));
