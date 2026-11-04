@@ -60,7 +60,7 @@ $archBody = @"
 </ol>
 <h2 id="sources">データ元と原本リンク</h2>
 <table><thead><tr><th>#</th><th>画面・成果物</th><th>データ元</th><th>原本・参照</th></tr></thead><tbody>
-<tr><td>1</td><td><a href="measured-monthly.html">Diamond実測</a></td><td>Graph Copilot利用状況レポート（actions）＋Entraユーザー（部門）。当月は月初来の参考値</td><td><a href="measured-monthly.json">公開用JSON</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/reportroot-getmicrosoft365copilotusageuserdetail">Graph API</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/user-list">ユーザー一覧API</a></td></tr>
+<tr><td>1</td><td><a href="measured-monthly.html">Diamond実測</a></td><td>Graph Copilot利用状況レポート（日別: アクション数／プロンプト数）＋Entraユーザー（部門）。当月は月初来の参考値</td><td><a href="measured-monthly.json">公開用JSON</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/reportroot-getmicrosoft365copilotusageuserdetail">Graph API</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/user-list">ユーザー一覧API</a></td></tr>
 <tr><td>2</td><td><a href="synthetic-monthly.html">完全合成</a></td><td>合成フィクスチャ（実績ではない）</td><td><a href="https://github.com/aktsmm/m365-copilot-insights/tree/main/exports/synthetic">exports/synthetic</a></td></tr>
 <tr><td>4</td><td>SharePoint（社内・要ログイン）</td><td>非公開側の検証済み集計（部門別）</td><td><a href="$sp">専用サイト</a>（権限のあるユーザーのみ）</td></tr>
 <tr><td>5</td><td>CSV</td><td>各ダッシュボード内の「CSVダウンロード」で、表示中の絞り込み結果を出力</td><td>各ページ内</td></tr>
@@ -82,7 +82,7 @@ $archBody = @"
 <li><a href="https://github.com/aktsmm/m365-copilot-insights">GitHubリポジトリ</a></li>
 <li><a href="https://learn.microsoft.com/ja-jp/sharepoint/dev/spfx/sharepoint-framework-overview">SharePoint Framework（SPFx）</a></li>
 </ul>
-<p>注意: 実測は actions であり prompts ではありません。月途中は確定できず「不明」と表示します。</p>
+<p>注意: 実測はアクション数とプロンプト数の2系列で、互いに代用しません。月途中は確定できず「不明」と表示します。</p>
 </main>
 "@
 $archHtml = "<!doctype html><html lang=`"ja`"><head><meta charset=`"UTF-8`"><meta name=`"viewport`" content=`"width=device-width,initial-scale=1`"><title>仕組みとデータ元</title><script>document.documentElement.setAttribute('data-theme', new URLSearchParams(location.search).get('scoutTheme') || 'dark');</script><style>$css`nbody{margin:0;padding:1rem;background:var(--cp-bg);color:var(--cp-text)}a{color:var(--cp-link)}table{border-collapse:collapse;width:100%}th,td{border:1px solid var(--cp-border);padding:.4rem .6rem;text-align:left;vertical-align:top}th{background:var(--cp-surface)}li{margin:.3rem 0}</style></head><body>$archBody</body></html>"
