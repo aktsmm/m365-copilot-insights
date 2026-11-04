@@ -85,8 +85,9 @@ foreach ($offset in -7..0) {
             $metric = @{ id = 'all-apps-actions'; ja = 'Copilotアクション数（プロンプト数とは異なる）'; en = 'Copilot actions (not prompts)'; key = 'allAppsCopilotActionCount' }
         } else {
             $csvRows = @($body | ConvertFrom-Csv)
+            $csvHeader = @(($body -split "`r?`n", 2)[0].Split(',') | ForEach-Object { $_.Trim().Trim('"') })
             foreach ($column in @('Report Refresh Date', 'Report Selected Date', 'User Principal Name', 'Prompts submitted for All Apps')) {
-                if ($csvRows.Count -eq 0 -or -not $csvRows[0].PSObject.Properties.Name.Contains($column)) { throw 'Daily CSV schema changed.' }
+                if ($column -cnotin $csvHeader) { throw 'Daily CSV schema changed.' }
             }
             $daily = @{ value = @(foreach ($csvRow in $csvRows) {
                 $promptText = "$($csvRow.'Prompts submitted for All Apps')".Trim()

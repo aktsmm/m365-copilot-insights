@@ -48,7 +48,11 @@ foreach ($person in $stable) { $expected[$person.'User Principal Name'.ToLowerIn
 Assert-Probe ($expected.Count -eq $stable.Count) 'Stable roster contains duplicates.'
 $days = @(
     foreach ($day in $summary.days) {
-        Assert-Probe ($day.status -eq 200) 'A daily request failed.'
+        if ($day.status -ne 200) {
+            # A failed day is an explicit unknown: it must not leave any data behind and is never counted as zero.
+            Assert-Probe (-not (Test-Path (Join-Path $probe "raw-$($day.date).json")) -and -not (Test-Path (Join-Path $probe "snapshots\$($day.date).json")) -and -not [string]::IsNullOrWhiteSpace([string]$day.errorCode)) 'A failed daily request must leave no data and record its error code.'
+            continue
+        }
         Assert-Probe ($day.fields -is [array]) 'Daily field metadata must remain an array, including empty results.'
         $raw = Get-Content (Join-Path $probe "raw-$($day.date).json") -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable -DateKind String
         $snapshot = Get-Content (Join-Path $probe "snapshots\$($day.date).json") -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable -DateKind String

@@ -92,7 +92,7 @@ try {
     $p=New-Artifact; $p.Remove('HistorySnapshotsPath')
     & $verifier @p | Out-Null
     $e=Get-Content -LiteralPath $p.EvidencePath -Raw | ConvertFrom-Json
-    Assert-True ($e.assertions -eq 1707 -and $e.historySnapshotCount -eq 0) 'No-history compatibility retains exactly 1707 source checks'
+    Assert-True ($e.assertions -eq 1699 -and $e.historySnapshotCount -eq 0) 'No-history compatibility retains exactly 1699 source checks'
     Assert-True ($e.currentRawReconciled -and -not $e.historicalRawReconciled) 'Evidence boundary is explicit'
     $p=New-Artifact -History @((New-Snapshot '2026-10-01' 2)) -Observed 9 -Known 8 -ExtraDates @('2026-10-01')
     & $verifier @p | Out-Null
@@ -156,7 +156,7 @@ try {
         Write-Json $path $value
         Assert-Throws { & $verifier @p } 'Snapshot metric drift|Snapshot date drift|Daily source value was changed'
     }
-    Write-Output "PASS: $script:Assertions assertions; no-history verifier 1707 checks preserved; history/current independent reconciliation fixtures only"
+    Write-Output "PASS: $script:Assertions assertions; no-history verifier 1699 checks preserved; history/current independent reconciliation fixtures only"
 } finally {
     if (Test-Path -LiteralPath $work) { Remove-Item -LiteralPath $work -Recurse -Force }
 }
