@@ -20,7 +20,7 @@ deployment and HTTP verification must complete before calling that URL available
 
 ## Manual workflows and configuration
 
-All workflows are manual-only. No schedules are installed.
+Workflows are manual except two schedules: the daily calendar collection (`calendar-validation.yml`, 06:00 and 18:00 JST) and the daily audit aggregate (`audit-aggregate.yml`, 03:30 JST).
 
 - `live-validation.yml`: Graph collection, strict joins and existing private SPO
   department publication.
@@ -88,3 +88,15 @@ Use fresh local output directories. A local pass does not verify Graph, SPO, OID
 Pages deployment, licensed Agentic inference, Viva fresh ingestion or SPFx access.
 No live complete-month prompt coverage is claimed by this package.
 
+## Troubleshooting a failed collection
+
+The private processing deliberately hides its messages from public logs. The public run status carries only an allowlisted stage name:
+`{"status":"failed","failedStage":"probe"}` (stages: `probe`, `restore`, `build`, `dashboard`, `publish`, and for the live mode `collect`, `observe`, `publish-observation`, `build-dashboard`, `publish-departments`).
+
+1. Read `failedStage` in the run log.
+2. `probe`: call the Graph report APIs once each (D7, D28, by-date) with a delegated admin token and check the HTTP status and the body format. Graph returns 504 intermittently; the by-date endpoint has answered JSON (actions) and CSV (prompts).
+3. `restore` / `build` / `dashboard`: reproduce with the same stage scripts against fixtures; the calendar tests cover month rollover and two metrics.
+4. `publish`: the verifier (`tests/Test-CopilotCalendarProbeResult.ps1`) independently recomputes the monthly values from the snapshots; a failed day must leave no data and record its error code.
+5. Never publish or print private response bodies while debugging; use a temporary workflow that prints only the stage name and a redacted message, and delete it afterwards.
+
+Known past causes (2026-11): Graph 504 on the usage reports, the by-date endpoint switching to CSV, a month rollover that left the new month without snapshots, and a strict gate that required all eight days to succeed.
