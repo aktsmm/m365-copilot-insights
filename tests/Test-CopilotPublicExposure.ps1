@@ -24,9 +24,11 @@ $audit = Get-Content -LiteralPath (Join-Path $flows 'audit-aggregate.yml') -Raw
 Assert ($audit -match 'workflow_dispatch:' -and (([regex]::Matches($audit, '(?m)^\s+- cron:')).Count -eq 1) -and $audit -notmatch 'push:|pull_request:') 'Audit aggregate must be manual or a single daily schedule only'
 Assert ($audit -notmatch 'upload-artifact|upload-pages-artifact|cache@|SPO_|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID') 'Audit aggregate has an exposure path or borrows another app'
 Assert ($audit -match 'Invoke-CopilotAuditAggregate.ps1' -and $audit -match 'id-token: write' -and $audit -match "github.repository == 'aktsmm/m365-copilot-insights'") 'Audit aggregate entry or guard mismatch'
+Assert ($audit -match 'Test-CopilotAuditAggregate.ps1' -and $audit.IndexOf('Test-CopilotAuditAggregate.ps1') -lt $audit.IndexOf('Invoke-CopilotAuditAggregate.ps1')) 'Audit privacy tests must run before the live query'
 $auditRun = Get-Content -LiteralPath (Join-Path $root 'scripts/Invoke-CopilotAuditAggregate.ps1') -Raw
 Assert ($auditRun -match "ExpectedRoles @\('AuditLogsQuery\.Read\.All'\)" -and $auditRun -match '-AggregateOnly') 'Audit aggregate must use the audit-only role and aggregate-only mode'
 Assert ($auditRun -notmatch 'userPrincipalName|\$r\.user\b') 'Audit aggregate must not print user identifiers'
+Assert ($auditRun -match '\$r\.agent -cnotin \$allowedAgents') 'Audit aggregate must reject unapproved public agent labels'
 $pages = Get-Content -LiteralPath (Join-Path $flows 'synthetic-pages.yml') -Raw
 Assert ($pages -notmatch 'schedule:|TENANT_ID|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID|SPO_|Get-CopilotUsage|Get-CopilotCalendarProbe') 'Pages must not use private source'
 Assert ($pages -match 'Build-CopilotPublicPages.ps1' -and $pages -match 'workflow_dispatch:') 'Static Pages entry missing'

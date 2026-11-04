@@ -24,6 +24,15 @@ while ($q.status -notin 'succeeded', 'failed', 'cancelled') {
 }
 if ($q.status -ne 'succeeded') { throw "audit query $($q.status)" }
 function Get-Prop($Object, [string[]]$Path) { $cur = $Object; foreach ($p in $Path) { if ($null -eq $cur -or $cur.PSObject.Properties.Name -notcontains $p) { return '' }; $cur = $cur.$p }; if ($null -eq $cur) { '' } else { [string]$cur } }
+function Get-PublicAgentLabel([string]$Name) {
+    if ([string]::IsNullOrWhiteSpace($Name)) { return '' }
+    switch ($Name.Trim()) {
+        'Researcher' { return 'Researcher' }
+        'Analyst' { return 'Analyst' }
+        'Planner Agent' { return 'Planner Agent' }
+        default { return 'その他' }
+    }
+}
 $records = [Collections.Generic.List[object]]::new()
 $uri = "https://graph.microsoft.com/v1.0/security/auditLog/queries/$($q.id)/records?`$top=1000"
 while ($uri) {
@@ -34,11 +43,15 @@ while ($uri) {
 $rows = foreach ($r in $records) {
     $data = $r.auditData
     $created = [datetime]::Parse([string]$r.createdDateTime, [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal -bor [Globalization.DateTimeStyles]::AdjustToUniversal)
+    $agent = Get-Prop $data @('CopilotEventData', 'TargetAgentName')
+    if ([string]::IsNullOrWhiteSpace($agent)) { $agent = Get-Prop $data @('AgentName') }
+    if ([string]::IsNullOrWhiteSpace($agent)) { $agent = Get-Prop $data @('CopilotEventData', 'AgentName') }
+    if ($AggregateOnly) { $agent = Get-PublicAgentLabel $agent }
     [pscustomobject]@{
         date    = $created.ToString('yyyy-MM-dd')
         user    = (Get-Prop $r @('userPrincipalName'))
         appHost = (Get-Prop $data @('CopilotEventData','AppHost'))
-        agent   = (Get-Prop $data @('CopilotEventData','AgentName'))
+        agent   = $agent
     }
 }
 if ($AggregateOnly) {

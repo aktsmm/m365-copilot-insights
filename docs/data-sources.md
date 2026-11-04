@@ -14,7 +14,7 @@
 | 5 | 取得日・欠測日・観測回数・確定回数 | 上記の日別履歴をスクリプトで検査・合算 | 取得できた日だけが観測回数。月が終了し全日分を取得した場合のみ確定。欠測はゼロにしない |
 | 6 | 公開 Pages の実測値 | 承認・加工済み `tests/fixtures/public-measured-monthly.json` | ハッシュと契約を検査した静的スナップショット。ライブ収集から公開への自動更新はない |
 | 7 | 完全合成デモ | リポジトリの合成フィクスチャと `exports/synthetic` | 実測とは別入口。テスト用で、顧客やテナントの実績ではない |
-| 8 | 日・アプリ別の Copilot 操作件数 | Purview 監査ログを Graph auditLog queries から専用アプリ / OIDC で取得 | 毎日 03:30 JST に無人集計。`AgentName` は空で名前別集計は未達。月次 Pages の値には加えない |
+| 8 | 日・アプリ・エージェント別の Copilot 監査操作件数・利用者数 | Purview 監査ログを Graph auditLog queries から専用アプリ / OIDC で取得 | 毎日 03:30 JST に無人集計。公開 Actions ログでは `Researcher`・`Analyst`・`Planner Agent` だけを表示し、その他の名前は集約、未記録は別扱い。監査の操作件数・利用者数であり、Viva のセッション数などとは別。月次 Pages の値には加えない |
 | 9 | Viva の Copilot / エージェント CSV | Viva Insights のログイン済み画面のエクスポート | ブラウザ操作で取得済み。GitHub 単体の無人取得は未実装。月次 Pages の値には加えない |
 | 10 | AI 解説 | 公開用実測値を部門・月・指標別に決定論的に集計した `measured-aggregate.json` | 手動起動の `measured-commentary` が集計だけを読み、検査後に Pages が自動配備。氏名・UPN・個票・ライブ原本を AI 入力にしない |
 | 11 | 障害 Issue | Actions API の実行結果とワークフロー定義済みのジョブ名・ステップ名 | 失敗 / タイムアウトで自動記録。ログ本文や Graph 応答は読まない。原因究明・自動修復は別作業 |

@@ -14,7 +14,12 @@ $token = Get-CopilotOidcToken -TenantId $TenantId -ClientId $AuditClientId -Expe
 $work = Join-Path ([IO.Path]::GetTempPath()) ('audit-' + [guid]::NewGuid().ToString('N') + '.csv')
 try {
     $result = & (Join-Path $PSScriptRoot 'Get-CopilotAuditSummary.ps1') -AccessToken $token -OutputPath $work -Days $Days -AggregateOnly
+    if ($result -isnot [string] -or $result -cnotmatch '^records=[0-9]+ groups=[0-9]+ aggregateOnly=true$') { throw 'Unexpected audit aggregate status.' }
     $rows = @(Import-Csv -LiteralPath $work)
+    $allowedAgents = @('', 'Researcher', 'Analyst', 'Planner Agent', 'その他')
+    foreach ($r in $rows) {
+        if ($r.agent -cnotin $allowedAgents) { throw 'Audit aggregate contained an unapproved public agent label.' }
+    }
     $lines = [Collections.Generic.List[string]]::new()
     $lines.Add("## Copilot 監査ログ集計 (直近 $Days 日, ユーザー名なし)")
     $lines.Add('')

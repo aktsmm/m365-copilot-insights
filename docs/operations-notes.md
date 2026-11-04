@@ -38,6 +38,14 @@ There are also event-triggered failure recording and Pages publication after mea
 - `record-collection-failure.yml`: failure / timeout event recording in Issues,
   using job and step names only, never raw logs.
 
+The audit workflow applies a fixed public-name allowlist before grouping:
+`Researcher`, `Analyst`, and `Planner Agent`; other names are grouped as
+`その他`, and a missing name remains separate. It rejects unexpected output
+labels before writing the public log or summary and runs synthetic privacy
+regressions before each live query. Audit interactions and distinct users are
+not Viva session counts. The failure recorder's actual event trigger has not
+been verified, and it cannot detect a scheduled workflow that never starts.
+
 The inference credential `COPILOT_GITHUB_TOKEN` has been provisioned and the
 synthetic workflow ran successfully on 2026-10-28. This is separate from the
 Azure OIDC credentials. Do not copy token values into issues, prompts or artifacts.

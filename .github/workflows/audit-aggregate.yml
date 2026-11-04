@@ -24,4 +24,6 @@ jobs:
           persist-credentials: false
       - name: Aggregate Copilot audit log (no user names)
         shell: pwsh
-        run: ./scripts/Invoke-CopilotAuditAggregate.ps1 -TenantId $env:TENANT_ID -AuditClientId $env:AUDIT_CLIENT_ID
+        run: |
+          ./tests/Test-CopilotAuditAggregate.ps1
+          ./scripts/Invoke-CopilotAuditAggregate.ps1 -TenantId $env:TENANT_ID -AuditClientId $env:AUDIT_CLIENT_ID
