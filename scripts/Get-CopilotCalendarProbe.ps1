@@ -43,9 +43,9 @@ foreach ($user in $users.value) { $index[$user.userPrincipalName.ToLowerInvarian
 # The D28 stable report intermittently returns 504 for minutes; retry with backoff, then fall back to the D7 roster.
 $report = $null
 $rosterPeriod = 'D28'
-for ($try = 0; $try -lt 4 -and -not $report; $try++) {
+for ($try = 0; $try -lt 2 -and -not $report; $try++) {
     $reply = Invoke-CopilotGraph -Uri "https://graph.microsoft.com/v1.0/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D28')" -Token $token -AllowError
-    if ($reply.Status -eq 200) { $report = $reply } else { Start-Sleep -Seconds (15 * ($try + 1)) }
+    if ($reply.Status -eq 200) { $report = $reply } else { Start-Sleep -Seconds 20 }
 }
 if (-not $report) {
     $rosterPeriod = 'D7'
