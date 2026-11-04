@@ -56,7 +56,7 @@ function validate(commentary, summary) {
   if (!keys(commentary, ['schemaVersion', 'inputSha256', 'observations']) ||
       commentary.schemaVersion !== 1 || commentary.inputSha256 !== summary.inputSha256 ||
       !Array.isArray(commentary.observations) || !commentary.observations.length ||
-      commentary.observations.length > summary.series.length) {
+      commentary.observations.length !== summary.series.length) {
     throw new Error('Commentary contract or aggregate digest mismatch');
   }
   const ids = new Set();

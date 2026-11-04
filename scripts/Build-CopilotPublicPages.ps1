@@ -88,7 +88,7 @@ $archBody = @"
 </ol>
 <h2 id="sources">データ元と原本リンク</h2>
 <table><thead><tr><th>#</th><th>画面・成果物</th><th>データ元</th><th>原本・参照</th></tr></thead><tbody>
-<tr><td>1</td><td><a href="measured-monthly.html">Diamond実測</a></td><td>Graph Copilot利用状況レポート（日別: アクション数／プロンプト数）＋Entraユーザー（部門）。当月は月初来の参考値</td><td><a href="measured-monthly.json">公開用JSON</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/reportroot-getmicrosoft365copilotusageuserdetail">Graph API</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/user-list">ユーザー一覧API</a></td></tr>
+<tr><td>1</td><td><a href="measured-monthly.html">Diamond実測</a></td><td>Graph Copilot利用状況レポート（日別: アクション数／プロンプト数）＋Entraユーザー（部門）。欠測のある参考値</td><td><a href="measured-monthly.json">公開用JSON</a> / <a href="https://learn.microsoft.com/ja-jp/microsoft-365/copilot/extensibility/api/admin-settings/reports/copilotreportroot-getmicrosoft365copilotusageuserdetailbydate">Graph 日別 API（beta）</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/user-list">ユーザー一覧API</a></td></tr>
 <tr><td>2</td><td><a href="synthetic-monthly.html">完全合成</a></td><td>合成フィクスチャ（実績ではない）</td><td><a href="https://github.com/aktsmm/m365-copilot-insights/tree/main/exports/synthetic">exports/synthetic</a></td></tr>
 <tr><td>3</td><td>SharePoint（社内・要ログイン）</td><td>非公開側の検証済み集計（部門別）</td><td><a href="$sp">専用サイト</a>（権限のあるユーザーのみ）</td></tr>
 <tr><td>5</td><td>CSV</td><td>各ダッシュボード内の「CSVダウンロード」で、表示中の絞り込み結果を出力</td><td>各ページ内</td></tr>

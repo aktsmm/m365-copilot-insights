@@ -7,7 +7,7 @@ const {aggregate, validate, render} = require('../scripts/Copilot.Commentary.cjs
 const payload = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures/public-measured-monthly.json'), 'utf8'));
 const summary = aggregate(payload);
 const make = () => ({schemaVersion: 1, inputSha256: summary.inputSha256,
-  observations: [{seriesId: summary.series[0].id, text: '取得できた日の参考値です。欠測があるため、期間全体の利用は断定できません。'}]});
+  observations: summary.series.map(s => ({seriesId: s.id, text: '取得できた日の参考値です。欠測があるため、期間全体の利用は断定できません。'}))});
 
 test('aggregate matches source totals per department and removes all personal fields', () => {
   const allowed = ['department', 'people', 'observedTotal', 'confirmedTotal', 'unknownPeople'];
@@ -33,7 +33,7 @@ test('empty coverage is unknown, not zero; changed input invalidates commentary'
   assert.throws(() => validate(make(), aggregate(changed)), /digest/);
 });
 test('commentary rejects identities, markup, extra fields, duplicate series and invented figures', () => {
-  assert.equal(validate(make(), summary).observations.length, 1);
+  assert.equal(validate(make(), summary).observations.length, summary.series.length);
   for (const text of ['<script>alert("bad")</script>', '架空の利用率は100%です', '連絡先はperson@example.orgです', '詳細はhttps://example.orgです']) {
     const value = make(); value.observations[0].text = text;
     assert.throws(() => validate(value, summary));
@@ -41,6 +41,7 @@ test('commentary rejects identities, markup, extra fields, duplicate series and 
   const extra = make(); extra.secret = 'unexpected'; assert.throws(() => validate(extra, summary));
   const duplicate = make(); duplicate.observations.push({...duplicate.observations[0]}); assert.throws(() => validate(duplicate, summary));
   const badSeries = make(); badSeries.observations[0].seriesId = 'unknown'; assert.throws(() => validate(badSeries, summary));
+  const missing = make(); missing.observations.pop(); assert.throws(() => validate(missing, summary));
 });
 test('render separates computed evidence and AI text, escapes content and links the actual inference run', () => {
   const value = make(); value.observations[0].text = '欠測があるため「A & B」の比較も確定できません。';
