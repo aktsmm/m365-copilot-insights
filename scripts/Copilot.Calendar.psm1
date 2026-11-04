@@ -186,7 +186,8 @@ function Get-CopilotMonthlyPayload {
                 }
             }
             $status = if ($end -gt $asOf) { 'in-progress' } elseif ($missing.Count -or @($rows | Where-Object { $_.status -eq 'unknown' }).Count) { 'partial' } else { 'complete' }
-            $refresh = if (-not $empty -and $selected.Count) { @($selected.reportRefreshDate | Sort-Object -Descending)[0] } else { $null }
+            # A month with no selected day yet (for example right after a rollover) reports the latest refresh date of the series.
+            $refresh = if ($empty) { $null } elseif ($selected.Count) { @($selected.reportRefreshDate | Sort-Object -Descending)[0] } else { @($records.reportRefreshDate | Sort-Object -Descending)[0] }
             $monthsOut.Add([ordered]@{
                 month=$month; metricId=$meta.metricId; metricLabelJa=$meta.metricLabelJa; metricLabelEn=$meta.metricLabelEn
                 dateBasis=$meta.dateBasis; source=$meta.source; reportRefreshDate=$refresh

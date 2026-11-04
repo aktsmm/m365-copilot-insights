@@ -120,7 +120,10 @@ try {
     Assert-Throws { Get-Payload @((New-Snapshot)) @('2026-11') } 'Future'
     Assert-Throws { Get-Payload @((New-Snapshot)) @('2024-02','2024-02') } 'unique'
     Assert-Throws { Get-Payload @() } 'Empty input'
-    $p=Get-CopilotMonthlyPayload -Snapshots @() -Months @('2024-02') -EmptyMetadata (New-Snapshot) -AsOfDate '2026-10-28'
+    # Month rollover: a new month with no selected day still reports the series refresh date, so the dashboard payload stays valid.
+$roll=Get-Payload @((New-Snapshot '2024-02-01' 3)) @('2024-02','2024-03') '2026-10-28'
+Assert-True ($roll.months.Count -eq 2 -and $roll.months[1].coverage.availableDates.Count -eq 0 -and -not [string]::IsNullOrEmpty([string]$roll.months[1].reportRefreshDate)) 'An empty rollover month must keep a valid reportRefreshDate.'
+$p=Get-CopilotMonthlyPayload -Snapshots @() -Months @('2024-02') -EmptyMetadata (New-Snapshot) -AsOfDate '2026-10-28'
     Assert-True ($p.months[0].coverage.availableDates.Count -eq 0 -and $null -eq $p.months[0].reportRefreshDate -and $null -eq $p.months[0].rows[1].count) 'Empty declaration never becomes observed success'
     $huge=@(New-Month '2024-02'); $huge[0].users[0].count=9007199254740991L
     Assert-Throws { Get-Payload $huge } 'safe integer range'
