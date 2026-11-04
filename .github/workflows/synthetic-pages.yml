@@ -1,8 +1,12 @@
 name: Measured and synthetic reproducible Pages
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Measured aggregate commentary"]
+    types: [completed]
 permissions:
   contents: read
+  actions: read
   pages: write
   id-token: write
 concurrency:
@@ -10,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish:
-    if: github.repository == 'aktsmm/m365-copilot-insights' && github.ref == 'refs/heads/main'
+    if: github.repository == 'aktsmm/m365-copilot-insights' && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
@@ -23,13 +27,24 @@ jobs:
         run: |
           ./tests/Test-CopilotPipeline.ps1
           ./tests/Test-CopilotPublicExposure.ps1
-          node --test ./tests/synthetic-pages.test.cjs ./tests/public-monthly.test.cjs
+          node --test ./tests/synthetic-pages.test.cjs ./tests/public-monthly.test.cjs ./tests/commentary.test.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Public monthly fixture tests failed' }
           ./tests/Test-CopilotSyntheticPages.ps1 -EvidenceDirectory "$env:RUNNER_TEMP/synthetic-reproducibility"
+      - name: Fetch only the bounded public commentary artifact
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENTARY_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: ./scripts/Get-CopilotCommentaryArtifact.ps1 -OutputDirectory "$env:RUNNER_TEMP/commentary" -RunId $env:COMMENTARY_RUN_ID
       - name: Build reviewed public-only measured export and independent synthetic fixtures
         shell: pwsh
         run: |
-          $result = ./scripts/Build-CopilotPublicPages.ps1 -OutputDirectory "$env:RUNNER_TEMP/synthetic-site"
+          $args = @{ OutputDirectory = "$env:RUNNER_TEMP/synthetic-site" }
+          if (Test-Path "$env:RUNNER_TEMP/commentary/commentary.json") {
+            $args.CommentaryPath = "$env:RUNNER_TEMP/commentary/commentary.json"
+            $args.CommentaryRunId = Get-Content "$env:RUNNER_TEMP/commentary/run-id.txt" -Raw
+          }
+          $result = ./scripts/Build-CopilotPublicPages.ps1 @args
           $manifest = Get-Content "$env:RUNNER_TEMP/synthetic-site/manifest.json" -Raw | ConvertFrom-Json
           if ($result.Status -ne 'success' -or -not $result.DistributionAllowed) { throw 'Synthetic build is not distributable' }
           Get-FileHash "$env:RUNNER_TEMP/synthetic-site/summary.json" -Algorithm SHA256 | ForEach-Object { "synthetic-summary-sha256=$($_.Hash)" }

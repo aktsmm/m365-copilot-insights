@@ -6,7 +6,11 @@
 固定SHA256で承認された公開用payloadだけを読み、private原本には接続しません。
 #>
 [CmdletBinding()]
-param([Parameter(Mandatory)][string]$OutputDirectory)
+param(
+    [Parameter(Mandatory)][string]$OutputDirectory,
+    [string]$CommentaryPath,
+    [string]$CommentaryRunId
+)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $pocRoot = Split-Path $PSScriptRoot -Parent
@@ -31,11 +35,34 @@ function Set-NavCurrent([string]$Nav, [string]$Href) {
     $current = '<a aria-current="page" style="color:var(--cp-text);font-weight:700;text-decoration:none;border-bottom:2px solid var(--cp-warning)" href="' + $Href + '">'
     $Nav.Replace($plain, $current)
 }
-$notice = '<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif"><strong>Diamondデモ環境の実測値（氏名・部門名は実データ、アカウントはドメインのみ非公開）</strong><p>データ元: Microsoft Graph の Copilot 利用状況レポート（日別。アクション数とプロンプト数）とEntraのユーザー属性。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細・原本リンク</a></p><p><b>Copilotアクションとは:</b> ユーザーが Copilot を意図して使った操作の数です（Word・Excel・PowerPoint・Outlook・Teams・Copilot Chat など全アプリの合計）。たとえば Copilot への質問の送信、メール下書きの生成、スレッドの要約などが1回ずつ数えられます。自動で出る提案だけでは数えず、ユーザーが操作した分だけです。チャットの回数ではなく、アプリ内の操作も含むため、プロンプト数より多くなることがあります。<b>Copilotプロンプト数とは:</b> Copilot に送信した質問の数です（Copilot Chat と各アプリの合計）。<a style="color:var(--cp-link)" href="https://learn.microsoft.com/viva/insights/advanced/reference/metrics#microsoft-copilot-metrics">Microsoft Learn の指標定義</a></p><details open><summary><b>データの出どころ（凡例） / Where each item comes from</b></summary><table style="border-collapse:collapse;margin:.5rem 0;font-size:.95em"><thead><tr><th style="text-align:left;border:1px solid var(--cp-border,#888);padding:.3rem .6rem">#</th><th style="text-align:left;border:1px solid var(--cp-border,#888);padding:.3rem .6rem">画面の項目</th><th style="text-align:left;border:1px solid var(--cp-border,#888);padding:.3rem .6rem">どこから取った情報か</th></tr></thead><tbody><tr><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">1</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">氏名・UPN・部門</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">Microsoft Entra のユーザー情報（Microsoft Graph の users）。UPN はドメイン部分だけ非公開、部門は集計時点の値</td></tr><tr><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">2</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">指標「Copilotアクション数」の観測回数</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">Microsoft Graph の日別 Copilot 利用状況レポート（beta、JSON 応答の allAppsCopilotActionCount）を、取得できた日だけ足した値</td></tr><tr><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">3</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">指標「Copilotプロンプト数」の観測回数</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">同じ日別レポートの CSV 応答（列 Prompts submitted for All Apps）を、取得できた日だけ足した値</td></tr><tr><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">4</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">確定回数</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">月の全日が取得済みで月が終わった場合だけ表示。それまでは「不明」（0 ではありません）</td></tr><tr><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">5</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">取得日 / 欠測日</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">GitHub Actions が毎日収集して蓄積した履歴。日別レポートは報告日の7日前までしか取れず、取得に失敗した日（504 など）は欠測になります</td></tr><tr><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">6</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">レポート基準日</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">Graph レポートの更新日（Report Refresh Date）。通常、実際の日付より1〜2日遅れます</td></tr><tr><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">7</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">生成日時</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">このデータを非公開側で作った時刻（UTC）</td></tr><tr><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">8</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">含まないもの</td><td style="border:1px solid var(--cp-border,#888);padding:.3rem .6rem">Viva Insights の集計、Purview 監査ログ、管理センターのエージェント一覧の数字。これらは別の取得口で、ここには足していません（<a style="color:var(--cp-link)" href="architecture.html#portal-map">画面ごとの対応表</a>）</td></tr></tbody></table></details><details><summary>この数値の読み方 / How to read this</summary><p>指標は「アクション数」と「プロンプト数」の2系列で、互いに代用しません。当月不完全のため確定回数は不明です。unknownはzeroではなく、不明を0に置き換えていません。観測回数は参考値であり、少利用判定には使用しません。</p><p>Measured values from the Diamond demo environment; names and department names are real, only the account domain is hidden. A Copilot action is one deliberate use of Copilot by a user, summed across all apps (Word, Excel, PowerPoint, Outlook, Teams, Copilot Chat), for example sending a question, generating an email draft or summarizing a thread; automatic suggestions are not counted. Actions and prompts are separate series and are never substituted for each other. The current month is incomplete; unknown is not zero. Observed counts are reference only, never confirmed low usage.</p></details></aside>'
+$notice = @'
+<aside style="padding:1rem;border:2px solid var(--cp-warning);background:var(--cp-surface);color:var(--cp-text);font-family:Segoe UI,Aptos,Calibri,sans-serif">
+<strong>Diamondデモ環境の実測値（架空のデモ人物の氏名・部門名を表示、アカウントはドメインのみ非公開）</strong>
+<p>データ元: Microsoft Graph の日別 Copilot 利用状況レポートと Entra ユーザー属性。<a style="color:var(--cp-link)" href="architecture.html#sources">詳細・原本リンク</a></p>
+<p><b>Copilotアクション数</b>は各アプリでの Copilot 操作を表す指標、<b>Copilotプロンプト数</b>は Copilot に送信した質問の指標です。厳密な換算関係や大小関係は確認できていないため、別系列で表示し、足し合わせません。個別操作が必ず一回に数えられるとは断定しません。</p>
+<details open><summary><b>データの出どころ（凡例） / Where each item comes from</b></summary>
+<table style="border-collapse:collapse;margin:.5rem 0;font-size:.95em"><thead><tr><th>#</th><th>画面の項目</th><th>どこから取った情報か</th></tr></thead><tbody>
+<tr><td>1</td><td>氏名・UPN・部門</td><td>Microsoft Entra のユーザー情報（Graph users）。UPN はドメイン部分を非公開、部門は取得時点の値</td></tr>
+<tr><td>2</td><td>アクション数の観測回数</td><td>Graph beta 日別レポートの JSON 応答 allAppsCopilotActionCount を、取得できた日だけ合算</td></tr>
+<tr><td>3</td><td>プロンプト数の観測回数</td><td>同じ日別 API の CSV 応答 Prompts submitted for All Apps を、取得できた日だけ合算。ブラウザなしで直接取得</td></tr>
+<tr><td>4</td><td>確定回数</td><td>月が終了し、全日分を取得した場合のみ表示。それまでは不明（ゼロではない）</td></tr>
+<tr><td>5</td><td>取得日・欠測日</td><td>GitHub Actions が蓄積した日別履歴。取得窓外・HTTP 504 などの失敗日は欠測</td></tr>
+<tr><td>6</td><td>レポート基準日</td><td>Graph の Report Refresh Date。今日の利用状況とは限らない</td></tr>
+<tr><td>7</td><td>生成日時</td><td>非公開処理側でこの集計を作った時刻（UTC）</td></tr>
+<tr><td>8</td><td>このページに含まない値</td><td>Viva Insights、Purview 監査ログ、管理センターのエージェント一覧、メッセージセンターの通知。<a style="color:var(--cp-link)" href="architecture.html#portal-map">別の取得口と自動化状況</a></td></tr>
+</tbody></table></details>
+<p>公開ページは承認済みスナップショットです。定期収集の結果がそのまま自動公開されるわけではありません。unknown は zero ではなく、観測回数を少利用の確定判定に使いません。<a style="color:var(--cp-link)" href="architecture.html">できること・できないこと</a></p>
+</aside>
+'@
 $measuredPath = Join-Path $output 'measured-monthly.html'
 $html = Get-Content -LiteralPath $measuredPath -Raw -Encoding utf8
+$commentaryArgs = @('render', $payloadPath, (Join-Path $output 'commentary-section.html'))
+if ($CommentaryPath) { $commentaryArgs += @($CommentaryPath, $CommentaryRunId) }
+& $node (Join-Path $PSScriptRoot 'Copilot.Commentary.cjs') @commentaryArgs
+if ($LASTEXITCODE -ne 0) { throw 'AI commentary contract failed; refusing publication.' }
+$commentarySection = Get-Content -LiteralPath (Join-Path $output 'commentary-section.html') -Raw -Encoding utf8
 $initialView = '<script>(() => { const view = document.querySelector(''select[id$="-view"]''); if (view) { view.value = "unknown"; view.dispatchEvent(new Event("change", { bubbles: true })); } })();</script>'
-$html = $html.Replace('<main id="dashboard">', "$(Set-NavCurrent $nav 'index.html')$notice<main id=`"dashboard`">").Replace('</body>', "$initialView</body>")
+$html = $html.Replace('<main id="dashboard">', "$(Set-NavCurrent $nav 'index.html')$notice$commentarySection<main id=`"dashboard`">").Replace('</body>', "$initialView</body>")
 [IO.File]::WriteAllText($measuredPath, $html, $utf8)
 $syntheticPath = Join-Path $output 'synthetic-monthly.html'
 $html = Get-Content -LiteralPath $syntheticPath -Raw -Encoding utf8
@@ -52,17 +79,18 @@ $archBody = @"
 <p><a href="index.html">&larr; トップ（Diamond実測）</a></p>
 <h2>全体の流れ</h2>
 <ol>
-<li><b>取得</b>: 非公開のGitHub Actionsが、OIDC連携でMicrosoft Graphの Copilot 利用状況レポートとEntraのユーザー一覧（部門）を取得します。</li>
+<li><b>取得</b>: 公開リポジトリのGitHub Actionsが、OIDC連携でMicrosoft Graphの Copilot 利用状況レポートとEntraのユーザー一覧（部門）を取得します。処理データとSharePointの保存先は非公開で、ログには許可された状態情報だけを出します。</li>
 <li><b>匿名化・検証</b>: 非公開側でUPNのドメインを隠し（氏名・部署名は架空の人物の実データ）、GUID・ドメイン・URLを除いたうえで、契約（スキーマ）と固定ハッシュで検証します。unknown（欠測）は0に置き換えません。</li>
-<li><b>公開</b>: 検証済みの公開用JSONだけから静的HTML（このPages）をビルドします。秘密情報・元ID・内部URLは含みません。</li>
+<li><b>公開</b>: 検証済みの公開用JSONから静的HTMLをビルドします。秘密情報・元IDは除去し、架空のデモ人物の氏名と部署名は公開します。SharePointリンクは要認証で、リンクによる権限付与はありません。</li>
 <li><b>社内閲覧</b>: 同じ集計をSharePoint上のSPFx Webパーツ（日本語既定）とCSVダウンロードで提供します。</li>
-<li><b>解説</b>: Agentic Workflow（GitHub Copilot CLI）が集計値だけを読み、要約コメントをIssueに書き出します（今回の実行は変更なし）。</li>
+<li><b>解説</b>: 手動起動のMeasured aggregate commentaryが、公開承認済みデータの部門別集計だけを読み、AI解説JSONをActions artifactへ出します。成功するとPagesが自動起動し、集計の識別子・出力契約を検査してトップページに掲載します。未生成時はその旨を表示し、古いデータ向けの解説は拒否します。</li>
+<li><b>障害記録</b>: 月次収集・監査集計の失敗やタイムアウトでIssueを自動作成・追記します。ジョブ名・ステップ名・実行URLだけを記録し、ログ本文の収集やAIによる原因確定・修復はしません。</li>
 </ol>
 <h2 id="sources">データ元と原本リンク</h2>
 <table><thead><tr><th>#</th><th>画面・成果物</th><th>データ元</th><th>原本・参照</th></tr></thead><tbody>
 <tr><td>1</td><td><a href="measured-monthly.html">Diamond実測</a></td><td>Graph Copilot利用状況レポート（日別: アクション数／プロンプト数）＋Entraユーザー（部門）。当月は月初来の参考値</td><td><a href="measured-monthly.json">公開用JSON</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/reportroot-getmicrosoft365copilotusageuserdetail">Graph API</a> / <a href="https://learn.microsoft.com/ja-jp/graph/api/user-list">ユーザー一覧API</a></td></tr>
 <tr><td>2</td><td><a href="synthetic-monthly.html">完全合成</a></td><td>合成フィクスチャ（実績ではない）</td><td><a href="https://github.com/aktsmm/m365-copilot-insights/tree/main/exports/synthetic">exports/synthetic</a></td></tr>
-<tr><td>4</td><td>SharePoint（社内・要ログイン）</td><td>非公開側の検証済み集計（部門別）</td><td><a href="$sp">専用サイト</a>（権限のあるユーザーのみ）</td></tr>
+<tr><td>3</td><td>SharePoint（社内・要ログイン）</td><td>非公開側の検証済み集計（部門別）</td><td><a href="$sp">専用サイト</a>（権限のあるユーザーのみ）</td></tr>
 <tr><td>5</td><td>CSV</td><td>各ダッシュボード内の「CSVダウンロード」で、表示中の絞り込み結果を出力</td><td>各ページ内</td></tr>
 </tbody></table>
 <h2 id="portal-map">M365 / Viva Insights の画面との対応</h2>
@@ -70,10 +98,14 @@ $archBody = @"
 <tr><td>1</td><td>M365 管理センター &gt; レポート &gt; Microsoft 365 Copilot</td><td>Graph Copilot利用状況レポート（v1.0 CSV）をGitHub ActionsがOIDCで無人取得</td><td>自動取得済み</td></tr>
 <tr><td>2</td><td>同 日別</td><td>Graph beta 日別（最新更新日の7日前から）を蓄積</td><td>窓外は復元不可</td></tr>
 <tr><td>3</td><td>部門（Entraユーザー属性）</td><td>Graph users（department）をUPNで突合</td><td>自動取得済み</td></tr>
-<tr><td>4</td><td>Viva Insights Copilotダッシュボード</td><td>人がUIで操作する「データのエクスポート」CSVのみ。無人APIは未確認</td><td>ブラウザ操作（CDP）で自動取得に成功。無人化は未達</td></tr>
-<tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td><td>Power BI / Fabric コネクタ（Partition ID・Query ID必要）</td><td>対応中（機能アクセスポリシーを作成済み・反映待ち。分析メニューが出れば接続）</td></tr>
+<tr><td>4</td><td>Viva Insights Copilot / エージェントダッシュボード</td><td>ログイン済みブラウザからCSVをエクスポート。公開APIでの取得は確認できていない</td><td>画面操作で取得済み。GitHubだけの無人取得は未実装。この月次グラフには含めない</td></tr>
+<tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td><td>公式にFabric Dataflow Gen2の定期更新とCopy jobがある（Partition ID・Query ID・容量が必要）</td><td>本テナントは11/4も分析結果ページに到達不可。未接続・追加費用未承認。クラウド自動化そのものが不可能という意味ではない</td></tr>
+<tr><td>6</td><td>Purview監査ログ</td><td>Graph auditLog queriesを専用アプリのOIDCで取得し、日・アプリ別に件数集計</td><td>毎日03:30 JSTに無人実行。AgentNameは空で名前別集計は未達。この月次グラフには含めない</td></tr>
+<tr><td>7</td><td>M365メッセージセンター</td><td>本リポジトリには収集処理なし</td><td>取得・表示していない。Graphの利用レポートやVivaの別名ではない</td></tr>
 </tbody></table>
 <p>詳細と公式リンク: <a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/data-sources.md">画面ごとのデータ取得方式（docs/data-sources.md）</a></p>
+<h2>自動化の境界</h2>
+<p>定期のGraph収集・監査集計は通常のActionsスクリプトが担当します。AIは収集しません。実測データの公開は加工済みスナップショットの承認・差し替えが必要で、ライブから自動公開しません。AI解説はGitHub上で手動起動でき、成功後のPages配備だけ自動です。元の合成用synthetic-commentaryは別の手動・noopデモとして残しています。</p>
 <h2>リンク集</h2>
 <ul>
 <li><a href="$sp">SharePoint専用サイト（要ログイン）</a></li>
@@ -94,8 +126,8 @@ $manifest.dataClass = 'mixed-explicitly-separated'
 $manifest.publicMeasuredExport = [ordered]@{
     dataClass = 'tenant'; publicPayloadSha256 = $digest
     htmlSha256 = (Get-FileHash -LiteralPath $measuredPath -Algorithm SHA256).Hash.ToLowerInvariant()
-    identityPolicy = 'Public-only sequential account and department labels; no original mapping or source hash is published'
-    metric = 'actions-not-prompts'; unknownIsZero = $false
+    identityPolicy = 'Approved fictional demo names and departments; sequential user IDs and hidden UPN domains'
+    metrics = @('all-apps-actions', 'all-apps-prompts'); unknownIsZero = $false
 }
 $manifest.monthlyFixture.htmlSha256 = (Get-FileHash -LiteralPath $syntheticPath -Algorithm SHA256).Hash.ToLowerInvariant()
 $manifest.files = @(Get-ChildItem -LiteralPath $output -File -Recurse | Where-Object { $_.FullName -ne $manifestPath } |

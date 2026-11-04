@@ -1,6 +1,6 @@
 # 運用メモ（詳細・英語）
 
-> 現状に合わない記述が残る場合があります。PAT は登録済みで Agentic 解説の実行は成功しています。最新の手順は [setup-guide](setup-guide.md) を参照してください。
+> 確認日: 2026-11-04。初期移行時の未認証状態ではなく、現在の実装を記載しています。取得元・未達項目は [data-sources](data-sources.md)、初回設定は [setup-guide](setup-guide.md) を参照してください。
 
 `aktsmm/m365-copilot-insights` combines generic collection and publication code
 with a separately built public static demonstration. This is a new source-only
@@ -15,16 +15,16 @@ synthetic fixtures, not additional measurements. The UI keeps measured actions,
 prompts, incomplete months and unknown values distinct. Unknown is never zero.
 
 Pages builds only these static public inputs. There is **no live-to-public refresh**.
-The planned Pages base is `https://aktsmm.github.io/m365-copilot-insights/`;
-deployment and HTTP verification must complete before calling that URL available.
+The deployed Pages base is `https://aktsmm.github.io/m365-copilot-insights/`.
 
 ## Manual workflows and configuration
 
 Workflows are manual except two schedules: the daily calendar collection (`calendar-validation.yml`, 06:00 and 18:00 JST) and the daily audit aggregate (`audit-aggregate.yml`, 03:30 JST).
+There are also event-triggered failure recording and Pages publication after measured commentary succeeds.
 
 - `live-validation.yml`: Graph collection, strict joins and existing private SPO
   department publication.
-- `calendar-validation.yml`: daily actions collection, verified private history
+- `calendar-validation.yml`: daily actions / prompts collection, verified private history
   restoration, immutable publication, byte readback and ETag metadata CAS.
 - `synthetic-pages.yml`: public fixture tests, reproducible static build and Pages.
   Its Pages OIDC token is for Pages deployment, not Graph; it has no tenant inputs.
@@ -33,15 +33,43 @@ Workflows are manual except two schedules: the daily calendar collection (`calen
   sub/aud/iss/repository/repository_id/repository_owner_id/ref appear.
 - `synthetic-commentary.lock.yml`: installed gh-aw Copilot engine, synthetic
   aggregate only, noop output. Compilation does not prove inference eligibility.
+- `measured-commentary.lock.yml`: manual inference on the approved public measured
+  aggregate only; a bounded JSON artifact, not a private API capability.
+- `record-collection-failure.yml`: failure / timeout event recording in Issues,
+  using job and step names only, never raw logs.
 
-Personal inference is `blocked-personal-inference-token-not-provisioned`.
-GitHub Agentic Workflows personal billing requires a user-provided
-`COPILOT_GITHUB_TOKEN`; the existing `copilot-requests: write` permission belongs
-to centralized organization billing and is not proof of personal eligibility.
-No PAT is provisioned, no engine is switched, and no known-blocked inference is
-dispatched by this migration. This does not block the independent backend/Pages
-gates. References: https://github.github.com/gh-aw/reference/billing/ and
+The inference credential `COPILOT_GITHUB_TOKEN` has been provisioned and the
+synthetic workflow ran successfully on 2026-10-28. This is separate from the
+Azure OIDC credentials. Do not copy token values into issues, prompts or artifacts.
+Compilation alone does not prove a new measured inference run succeeded.
+References: https://github.github.com/gh-aw/reference/billing/ and
 https://github.github.com/gh-aw/reference/auth/
+
+## Measured aggregate commentary
+
+From GitHub Actions, run **Measured aggregate commentary** on `main`.
+No local browser or Microsoft 365 login is needed. The pre-step computes
+department / month / metric totals from the reviewed public fixture. It strips
+user IDs, names and UPNs before the model reads `exports/measured-aggregate.json`.
+The original private source and live APIs are never model inputs.
+
+The model uploads one `measured-commentary` artifact containing `commentary.json`.
+The separate Pages workflow runs after successful inference, checks the originating
+repository / workflow / branch, bounded artifact size, strict keys and source digest,
+then HTML-escapes the short Japanese text. All numeric evidence is computed by
+scripts; prose cannot contain numeric digits. Interpretation is labelled AI-generated,
+not an official report, individual assessment, or proof of adoption.
+
+Manual Pages dispatch reuses the latest successful inference artifact. Before the
+first inference it explicitly shows no AI prose. Missing / expired artifacts,
+invalid JSON or a changed aggregate digest stop deployment instead of reusing stale
+text. After a public fixture update, rerun measured commentary before publishing.
+Artifacts retain seven days; rerun inference if they expire. Previously deployed
+Pages content remains until a successful replacement deployment.
+
+The public page links to the aggregate input, AI JSON and inference run. Only the
+public aggregate artifact is downloaded; never download backend artifacts or logs.
+Source: https://github.github.com/gh-aw/reference/safe-outputs/#artifact-uploads-upload-artifact
 
 Private backend workflows require repository variables `TENANT_ID`,
 `COLLECTOR_CLIENT_ID`, `PUBLISHER_CLIENT_ID`, `SPO_SITE_ID`, `SPO_LIBRARY_ID`,
@@ -70,7 +98,7 @@ Do not delete or rewrite historical private runs during migration.
 ## Local validation
 
 PowerShell 7.5+, Node.js and Git are required; gh-aw is needed to recompile the
-Agentic Markdown, without switching engine or supplying a PAT.
+Agentic Markdown, without switching engine or displaying a PAT.
 
 ```powershell
 & .\tests\Test-CopilotPipeline.ps1
@@ -79,7 +107,7 @@ Agentic Markdown, without switching engine or supplying a PAT.
 & .\tests\Test-CopilotHistory.ps1
 & .\tests\Test-CopilotMonthlyPublish.ps1
 & .\tests\Test-CopilotCurrentPointer.ps1
-node --test .\tests\synthetic-pages.test.cjs .\tests\public-monthly.test.cjs
+node --test .\tests\synthetic-pages.test.cjs .\tests\public-monthly.test.cjs .\tests\commentary.test.cjs
 & .\tests\Test-CopilotSyntheticPages.ps1 -EvidenceDirectory .\.local\reproducibility
 & .\scripts\Build-CopilotPublicPages.ps1 -OutputDirectory .\.local\public-site
 ```
@@ -89,6 +117,12 @@ Pages deployment, licensed Agentic inference, Viva fresh ingestion or SPFx acces
 No live complete-month prompt coverage is claimed by this package.
 
 ## Troubleshooting a failed collection
+
+`Record collection failure` automatically creates or comments on an Issue when
+calendar collection or audit aggregation fails or times out. It records the run
+URL, conclusion, and workflow-defined failed job / step names. This is deterministic
+recording, not AI diagnosis or repair. It cannot see the hidden private exception
+body, so it does not claim the root cause or copy report data into a public Issue.
 
 The private processing deliberately hides its messages from public logs. The public run status carries only an allowlisted stage name:
 `{"status":"failed","failedStage":"probe"}` (stages: `probe`, `restore`, `build`, `dashboard`, `publish`, and for the live mode `collect`, `observe`, `publish-observation`, `build-dashboard`, `publish-departments`).

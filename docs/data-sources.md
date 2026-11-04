@@ -1,56 +1,59 @@
-# M365 / Viva Insights の画面と、このダッシュボードのデータ取得方式
+# 表示項目の取得元と自動化の境界
 
-「Microsoft 365 管理センターや Viva Insights のあの画面の数字は、どこから・どの方式で取れているか（取れていないか）」の対応表です。公開ページ [仕組みとデータ元](https://aktsmm.github.io/m365-copilot-insights/architecture.html#portal-map) からもここへ飛べます。
+確認日: 2026-11-04。実装済みの方式、実測結果、公式にある別経路を区別します。
+[公開ページの対応表](https://aktsmm.github.io/m365-copilot-insights/architecture.html#portal-map) と同じ整理です。
 
-確認日: 2026-11-04（Diamond デモテナントでの実機確認を含む。2026-10-29 の調査に、11/3〜11/4 の確認を追記）。
+## 何をどこから取得するか
 
-## 画面ごとの対応
+| # | 情報 | 取得元・方式 | 自動化と表示先 |
+|---|---|---|---|
+| 1 | Copilot の最終利用日・利用者一覧 | Microsoft Graph v1.0 `getMicrosoft365CopilotUsageUserDetail`（CSV） | OIDC のアプリ認証で取得。日別の対象者を確保する取得口であり、D28 を暦月の回数に置換しない |
+| 2 | 日別アクション数 | Graph beta `getMicrosoft365CopilotUsageUserDetailByDate` の JSON `allAppsCopilotActionCount` | 通常 Actions が毎日 06:00 / 18:00 JST に収集、履歴を月次集計し非公開 SharePoint へ保存 |
+| 3 | 日別プロンプト数 | 同じ beta API の CSV 列 `Prompts submitted for All Apps` | ブラウザの CSV ダウンロードではなく API 応答。アクション数とは別系列で取り込む |
+| 4 | 氏名・UPN・部署 | Graph `users` の `displayName` / `userPrincipalName` / `department` | 利用レポートと突合。部門は取得時点の属性で、異動前を復元するものではない |
+| 5 | 取得日・欠測日・観測回数・確定回数 | 上記の日別履歴をスクリプトで検査・合算 | 取得できた日だけが観測回数。月が終了し全日分を取得した場合のみ確定。欠測はゼロにしない |
+| 6 | 公開 Pages の実測値 | 承認・加工済み `tests/fixtures/public-measured-monthly.json` | ハッシュと契約を検査した静的スナップショット。ライブ収集から公開への自動更新はない |
+| 7 | 完全合成デモ | リポジトリの合成フィクスチャと `exports/synthetic` | 実測とは別入口。テスト用で、顧客やテナントの実績ではない |
+| 8 | 日・アプリ別の Copilot 操作件数 | Purview 監査ログを Graph auditLog queries から専用アプリ / OIDC で取得 | 毎日 03:30 JST に無人集計。`AgentName` は空で名前別集計は未達。月次 Pages の値には加えない |
+| 9 | Viva の Copilot / エージェント CSV | Viva Insights のログイン済み画面のエクスポート | ブラウザ操作で取得済み。GitHub 単体の無人取得は未実装。月次 Pages の値には加えない |
+| 10 | AI 解説 | 公開用実測値を部門・月・指標別に決定論的に集計した `measured-aggregate.json` | 手動起動の `measured-commentary` が集計だけを読み、検査後に Pages が自動配備。氏名・UPN・個票・ライブ原本を AI 入力にしない |
+| 11 | 障害 Issue | Actions API の実行結果とワークフロー定義済みのジョブ名・ステップ名 | 失敗 / タイムアウトで自動記録。ログ本文や Graph 応答は読まない。原因究明・自動修復は別作業 |
+| 12 | M365 メッセージセンターの通知 | 本リポジトリには収集処理なし | 取得・表示していない。管理センターの利用状況レポートとは異なる |
 
-| # | 見ている画面 | 同じ数字の取得口 | このリポジトリでの方式 | 状態 |
-| --- | --- | --- | --- | --- |
-| 1 | M365 管理センター > レポート > 使用状況 > Microsoft 365 Copilot | Microsoft Graph `copilot/reports/getMicrosoft365CopilotUsageUserDetail`（v1.0、CSV） | GitHub Actions が OIDC でアプリ認証し、Graph から直接取得（人のログイン不要） | 自動取得済み（無人で別 runner 2 回成功） |
-| 2 | 同上の日別 | Graph beta `getMicrosoft365CopilotUsageUserDetailByDate` | 最新更新日の 7 日前から取得できる窓を使い、日別履歴を蓄積 | 取得口は実測済み。応答は JSON（アクション数）と CSV（プロンプト数）のどちらもあり得るため、両方を別の指標として取り込む。504 の日は欠測。完全な暦月の値は窓外を復元できない |
-| 3 | 部門（Entra のユーザー属性） | Graph `users`（department） | 同じアプリで取得し、UPN で突合 | 自動取得済み |
-| 4 | Viva Insights > Copilot ダッシュボード（準備状況・導入・影響） | 画面は集計表示。個人別の無人 API は公式に未確認 | 取得していない。ダッシュボード右上の「データのエクスポート (プレビュー)」は人が UI で操作する CSV | ログイン済みブラウザの CDP 操作（`scripts/viva_export_cdp.py`）で自動取得に成功（2026-10-29、週×人×部署の CSV）。完全な無人化は未達 |
-| 5 | Viva Insights 高度分析（Analysis results のクエリ） | Power BI コネクタ / Fabric Dataflow Gen2（Partition ID と Query ID が必要） | 公式の自動取得経路はこれ。未接続 | 対応中。管理者の機能アクセスポリシー（Copilot メトリックス エクスポート）を作成済みで反映待ち（最大 24 時間）。Analysis メニューが出れば接続する（下記の止まりどころ） |
+「Copilot アクション」は各アプリでの Copilot 操作を表す指標、
+「プロンプト」は Copilot に送信した質問の指標です。両者の厳密な換算関係は確認できていません。
+数の大小関係や一つの操作の数え方を推測せず、同じ月でも別系列として表示します。
+Graph beta は応答が JSON / CSV の両方だった実測に対応しています。
+日別の取得窓は最新更新日の七日前から更新日までで、窓外や 504 の欠測は復元済みと扱いません。
 
-## Viva Insights の自動取得が止まっている理由（実機で確認した事実）
+## Viva をクラウドで自動取得できるか
 
-- Insights Analyst ロールを付与しても、左ナビに「分析」「分析結果」がなく、`/AnalysisResults` などの URL も「ページが見つかりません」になる。
-- 管理センターに「行動分析情報がオフ」が表示される。Partition ID / Query ID は分析結果のクエリから取るため、そこへ到達できていない。
-- 行動分析情報の有効化は機能アクセス管理のポリシー（行動エクスペリエンス）で行う。デモテナントで 2026-10-29 12:08 にオンのポリシーを作成済み。反映まで最大 24 時間で、「分析」メニューが出るかは反映後に再確認する（未確認）。
-- Graph だけで近似できるのはアプリ別のアクティブ日数まで（日次スナップショットを蓄積）。操作数・プロンプト数・習慣化割合・会議サマリーは Graph に無い。
-- Fabric / Power BI 経路には容量（追加費用の可能性）が必要。
+**製品全体として不可能ではありません。ただし本環境ではまだ実現していません。**
 
-## Viva Insights の現状（2026-11-03 追記）
+| # | 経路 | 公式に確認できること | 本環境で確認したこと・必要条件 |
+|---|---|---|---|
+| 1 | ダッシュボードから CSV エクスポート | Copilot のエクスポートはプレビュー。画面の Export data から週 / 日を選んで取得する手順 | Copilot とエージェントの CSV をブラウザで取得済み。このボタンを直接置換する公開 API は確認できていない |
+| 2 | 高度分析 → Fabric Dataflow Gen2 | Viva クエリの自動更新、Dataflow の定期更新、Copy job による他のクラウドストレージへの自動転送が公式にある。Agent 365 のエクスポート表も記載されている | Partition ID / Query ID、組織アカウントの初回サインイン、Fabric ワークスペースと容量が必要。容量消費・費用が発生し得る。未接続・追加容量は作成していない |
+| 3 | 現在の高度分析の入口 | デモテナントでは高度分析にアクセスできない旨の公式トラブルシュートがある | 11/4 も「分析」メニューなし、`AnalysisResults` はページが見つからない。単に「ポリシー反映待ち」とはもう記載しない。この環境のデモ種別による制約かは確定していない |
 
-- 管理センターの左ナビに「Copilot ダッシュボード」「エージェントダッシュボード」「消費量ダッシュボード」が表示された。2026-10-30 時点では「分析」メニューが出ていなかったため、行動分析情報の有効化の反映後に出現したと見ている（因果は未確認）。
-- Agent 365 ダッシュボード（4 週間）は、アクティブなエージェントとユーザーの数を表示する。日単位 CSV には、標準エージェント（Researcher、Analyst、Planner Agent）の利用が、管理センターの「すべてのエージェント」には載らないのに載っていた。
-- 「分析」メニューと Power BI / Fabric の経路は、引き続き未検証。
+機能アクセスポリシーは以前に作成済みですが、設定の存在を分析機能の利用成功とはしません。
+Fabric の再開条件は、高度分析の利用可否とクエリ ID を確認でき、容量・費用・接続先が承認されることです。
+この経路は GitHub だけで取得する方式ではなく、クラウド側で集計・定期更新し、必要なら GitHub が出力を読む方式です。
+ブラウザの Cookie の GitHub への移送、無人ログイン用の MFA 解除、認証の迂回は実装しません。
 
-## 無人で取れる経路の整理（2026-10-29 調査）
+## AI と通常の Actions の分担
 
-| # | 経路 | 取れるもの | 無人化 | 状況 |
-| --- | --- | --- | --- | --- |
-| 1 | Graph の Copilot 利用状況レポート | ユーザー別の最終利用日・アクティブ判定 | アプリ権限 + OIDC で可 | 運用中 |
-| 2 | Purview 監査ログ（CopilotInteraction） | ユーザー別・アプリ別・エージェント別の操作件数 | Graph の監査ログクエリ。アプリ権限 + OIDC で可（管理者同意が必要） | 委任トークンで取得を確認。無人化は未実施 |
-| 3 | Viva の Copilot / エージェント ダッシュボードの Export | Copilot ダッシュボードは約 110 列の集計。エージェントダッシュボードは日単位 CSV（会話型セッション数、再訪ユーザーなど。エージェント名つき。標準エージェントの利用も載る） | 画面のボタンのみで API なし。ログイン済みブラウザの CDP 操作で取得は可能 | 有人のみ（2026-11-03 にエージェントの CSV を取得） |
-| 4 | Viva 高度分析 + Power BI / Fabric コネクタ | 最も詳細な集計 | 手順書は組織アカウントの対話サインインのみ。サービスプリンシパルの記載なし | デモテナントでは利用不可と公式に明記（本環境がデモ種別かは未確認） |
+集計・収集・契約検査・失敗 Issue 記録・配備は通常のスクリプトです。
+AI は公開承認済みデータの集計を解釈するだけで、欠測値の生成や Viva の取得はしません。
+推論の成果物と入力の識別子が一致しなければ公開を止めます。
+元の `synthetic-commentary` は合成入力のみの noop デモとして別に残します。
+実測の更新は引き続き承認済み公開スナップショットの差し替えが必要です。
 
-- 公式の記載: 「デモテナントでは高度分析にアクセスできない」（[Viva Insights のエラー対処](https://learn.microsoft.com/troubleshoot/viva/insights/error-messages/viva-insights-errors#advanced-analysis)）。
-- 高度分析の前提: 50 以上の対象ライセンス、Insights Analyst ロール、行動分析情報のオン（反映に数日）。[手順](https://learn.microsoft.com/viva/insights/advanced/setup-maint/enable-disable-behavioral-insights)。
-- エージェント別の人気: 管理センターの Agents usage レポートは画面のみ。無人で集計するなら、監査ログの `AgentName` を集計する方法が現実的です（エージェントを使った実績が必要）。
-
-## 方式の違いの読み方
-
-- Graph 取得は「アプリがトークンを取る無人方式」。人の Cookie やブラウザ操作は使わない。
-- Viva の画面エクスポートは「人が操作する方式」。無人ジョブには持ち込まない。
-- 指標も別物。Graph の `actions` と `prompts`、Viva の集計値は定義と期間が違うため足し合わせない。
-
-## 原本・公式リンク
+## 公式資料
 
 - [Graph usage detail](https://learn.microsoft.com/ja-jp/microsoft-365/copilot/extensibility/api/admin-settings/reports/copilotreportroot-getmicrosoft365copilotusageuserdetail)
-- [Graph 日別 (beta)](https://learn.microsoft.com/ja-jp/microsoft-365/copilot/extensibility/api/admin-settings/reports/copilotreportroot-getmicrosoft365copilotusageuserdetailbydate)
-- [Viva Copilot metrics export](https://learn.microsoft.com/ja-jp/viva/insights/org-team-insights/export-copilot-metrics)
-- [Viva → Power BI コネクタ](https://learn.microsoft.com/ja-jp/viva/insights/advanced/analyst/power-bi-connector)
-- [Viva → Fabric Dataflow Gen2](https://learn.microsoft.com/ja-jp/viva/insights/advanced/analyst/export-query-data-microsoft-fabric)
+- [Graph 日別レポート（beta）](https://learn.microsoft.com/ja-jp/microsoft-365/copilot/extensibility/api/admin-settings/reports/copilotreportroot-getmicrosoft365copilotusageuserdetailbydate)
+- [Copilot メトリックのエクスポート（プレビュー）](https://learn.microsoft.com/ja-jp/viva/insights/org-team-insights/export-copilot-metrics)
+- [Viva から Fabric への出力・定期更新](https://learn.microsoft.com/ja-jp/viva/insights/advanced/analyst/export-query-data-microsoft-fabric)
+- [Viva 高度分析のアクセスエラー](https://learn.microsoft.com/ja-jp/troubleshoot/viva/insights/error-messages/viva-insights-errors#advanced-analysis)
+- [Viva から Power BI への接続](https://learn.microsoft.com/ja-jp/viva/insights/advanced/analyst/power-bi-connector)

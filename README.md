@@ -19,22 +19,25 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 | 2 | 部門別 CSV/HTML を SharePoint の専用サイトへ保存（上書きせず、履歴を保持） | 検証済み |
 | 3 | 公開 Pages に、公開用に加工したデータだけを静的に公開 | 検証済み（更新は手動。ライブから公開への自動更新はない） |
 | 4 | SharePoint ページ用 SPFx Web パーツ | アプリカタログ登録・デプロイ・専用サイトへのインストールまで完了。一般ユーザーでの閲覧確認は未実施 |
-| 5 | Agentic Workflow による解説生成 | 実行成功。ただし対象は合成データの要約だけで、出力は noop 設計のため解説文は公開されない。実データの解析は未実施 |
+| 5 | Agentic Workflow による解説生成 | `Measured aggregate commentary` は公開承認済みの実測値の部門別集計のみを読む。GitHub 上で手動起動し、出力 JSON の検査後に Pages を自動配備する。氏名・個票やライブ原本は読ませない。元の合成用ワークフローは別の noop デモ |
 | 6 | Purview 監査ログの集計（Copilot の操作を日・アプリ・エージェント名で件数集計。ユーザー名は出さない） | 検証済み（専用アプリ・OIDC で無人実行、毎日 1 回）。ただし `AgentName` は空で、エージェント別の集計はまだ取れていない |
-| 7 | Viva Insights の Copilot / エージェント / 消費量ダッシュボード | 管理センターに表示される（2026-11-03 確認）。エージェントダッシュボードの日単位 CSV は、ログイン済みブラウザの CDP 操作で取得できる。API はなく、**無人化は未達** |
+| 7 | Viva Insights の Copilot / エージェント / 消費量ダッシュボード | 表示と CSV のブラウザ取得を確認。GitHub 単体の無人取得は未達。高度分析 → Fabric 定期更新の公式経路はあるが、本テナントでは分析結果ページに到達できず未接続 |
 | 8 | デモ用の利用実績づくり（TAP と CDP の画面操作） | 動作する。人が操作する補助で、定期実行や無人運用の対象ではない（[docs/demo-usage-seeding.md](docs/demo-usage-seeding.md)） |
+| 9 | 収集失敗の自動記録 | 月次収集・監査集計の失敗 / タイムアウトで Issue を作成・追記。ジョブ名・ステップ名・実行 URL のみ。AI 原因調査や自動修復ではない |
 
 ## 自動でできること・できないこと（2026-11-04 時点）
 
 | # | 区分 | 内容 |
 |---|------|------|
 | 1 | 無人で動く | Graph の日別利用（アクション数／プロンプト数）の取得と履歴の蓄積（毎日 06:00 と 18:00 JST）、暦月の集計、SharePoint への保存、Purview 監査ログの件数集計（毎日 03:30 JST）、公開前の検査 |
-| 2 | 手動で起動する | 公開 Pages の更新、OIDC の確認、ライブ取得（`live-validation.yml`）、Agentic 解説 |
+| 2 | GitHub 上で手動起動する | 公開 Pages の更新、OIDC の確認、ライブ取得（`live-validation.yml`）、実測集計の Agentic 解説。解説の成功後は Pages が自動起動する。ローカル操作は不要 |
 | 3 | 有人の画面操作が必要 | Viva Insights のダッシュボードの CSV エクスポート、デモ利用実績づくり、SharePoint Home のリンク追加などの画面設定 |
-| 4 | 取れていない・できない | エージェント別の利用数（監査ログの `AgentName` が空。管理センターの「すべてのエージェント」の数字も画面のみ）、完全な暦月のプロンプト数（日別 API の取得窓外は復元できず、504 の日は欠測）、Viva 高度分析（Power BI / Fabric）の無人取得、Agentic による実データの解析、一般ユーザーでの SPFx 閲覧確認 |
+| 4 | この実装では未達 | エージェント別の無人集計（監査ログの `AgentName` が空。Viva CSV は有人取得済み）、完全な暦月のプロンプト数（日別 API の窓外・504 は欠測）、Viva 高度分析（Power BI / Fabric）の無人取得、一般ユーザーでの SPFx 閲覧確認。M365 メッセージセンターの通知は取得・表示していない |
 | 5 | 既知の制約 | 日別 API は報告日の 7 日前から報告日までしか取れない。Graph の利用状況レポートは 504 を返すことがあり、取れない日は「不明」として残す（0 にしない）。応答形式が JSON から CSV に変わった事例がある |
 
-失敗時は、公開の実行ログに失敗した段階名だけが出ます（例: `"failedStage":"probe"`）。詳しい確認手順は [docs/operations-notes.md](docs/operations-notes.md) を参照してください。
+失敗時は、公開の実行ログに許可された段階名（例: `"failedStage":"probe"`）を出し、別の通常 Actions が失敗 Issue を記録します。Issue にログ本文や個人データは転記しません。詳しい手順は [docs/operations-notes.md](docs/operations-notes.md) を参照してください。
+
+**収集するスクリプトと、解釈する AI は別工程です。** Graph の CSV 応答も Actions がブラウザなしで直接取得します。AI は公開用の集計 JSON に短い参考解説を付けるだけで、Viva の取得や欠測の補完はしません。取得元と表示先は [データ対応表](docs/data-sources.md)、解説の契約と起動方法は [運用メモ](docs/operations-notes.md#measured-aggregate-commentary) を参照してください。
 
 ## 見方の約束
 
@@ -44,7 +47,7 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 ## 公開データの境界
 
 - 公開 Pages は、静的な公開用入力だけで作られます。**ライブの実データから公開への自動更新はありません。**
-- 公開リポジトリには、秘密情報・元のアカウント ID・完全な UPN・氏名・管理 ID・テナントのドメイン・社内 URL を含めません（氏名・部署名は架空の人物の実データで公開し、UPN はドメイン部分のみ非公開です）。
+- 公開用 JSON は秘密情報・元のアカウント ID・完全な UPN・管理 ID を除去します。氏名・部署名は架空のデモ人物の値を公開し、UPN はドメイン部分を隠しています。Pages の SharePoint リンクはデモ用の要認証リンクであり、リンクから閲覧権限は付与されません。
 - 実測の公開用データは `tests/fixtures/public-measured-monthly.json` です（承認済み・加工済み）。
 
 ## 構成
@@ -56,7 +59,7 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 | ワークフロー | `.github/workflows/` |
 | テスト | `tests/` |
 
-ワークフローは手動起動が基本です。定期実行は、月次の日別収集（`calendar-validation.yml`、毎日 06:00 と 18:00 JST）と、監査ログの集計（`audit-aggregate.yml`、毎日 03:30 JST）の 2 つだけです。
+定期実行は、月次の日別収集（`calendar-validation.yml`、毎日 06:00 と 18:00 JST）と、監査ログ集計（`audit-aggregate.yml`、毎日 03:30 JST）の 2 つです。これに加え、失敗時の Issue 記録と、実測集計の AI 解説成功後の Pages 配備がイベントで自動起動します。AI 推論自体に定期実行はありません。
 
 ## ローカルでのテスト
 
@@ -65,7 +68,7 @@ PowerShell 7.5 以上、Node.js、Git が必要です。
 ```powershell
 & .\tests\Test-CopilotPipeline.ps1
 & .\tests\Test-CopilotPublicExposure.ps1
-node --test .\tests\synthetic-pages.test.cjs .\tests\public-monthly.test.cjs
+node --test .\tests\synthetic-pages.test.cjs .\tests\public-monthly.test.cjs .\tests\commentary.test.cjs
 ```
 
 ローカルのテストが通っても、Graph・SharePoint・OIDC・Pages 配備・Agentic 推論・Viva の取得・SPFx のアクセスが成功した証拠にはなりません。完全な暦月のプロンプト数は未達です（日別 API の窓外と 504 の欠測があるため）。

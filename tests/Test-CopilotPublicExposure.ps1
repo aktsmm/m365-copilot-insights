@@ -45,6 +45,14 @@ Assert ($failure -match 'workflow_run:' -and $failure -notmatch 'id-token:|uploa
 $commentary = Get-Content -LiteralPath (Join-Path $flows 'synthetic-commentary.lock.yml') -Raw
 Assert ($commentary -notmatch 'id-token:|TENANT_ID|COLLECTOR_CLIENT_ID|PUBLISHER_CLIENT_ID|SPO_') 'Agentic workflow has a private data capability'
 Assert ($commentary -notmatch '(?m)^  schedule:') 'Agentic must be manual-only'
+$measuredCommentary = Get-Content -LiteralPath (Join-Path $flows 'measured-commentary.md') -Raw
+Assert ($measuredCommentary -match 'workflow_dispatch:' -and $measuredCommentary -match 'upload-artifact:' -and
+    $measuredCommentary -match 'exports/measured-aggregate.json' -and
+    $measuredCommentary -notmatch 'id-token:|TENANT_ID|CLIENT_ID|SPO_|schedule:|contents: write|issues: write') 'Measured inference must remain public-aggregate-only and manually triggered'
+$compiledMeasured = Get-Content -LiteralPath (Join-Path $flows 'measured-commentary.lock.yml') -Raw
+Assert ($compiledMeasured -notmatch 'id-token:|TENANT_ID|CLIENT_ID|SPO_|contents: write') 'Compiled inference must not acquire private or repository-content-write capabilities'
+Assert ($pages -match 'Measured aggregate commentary' -and $pages -match 'Get-CopilotCommentaryArtifact.ps1' -and
+    $pages -match 'head_repository.full_name == github.repository') 'Automatic Pages publication must validate the originating commentary workflow'
 
 $work = Join-Path $PSScriptRoot ('public-exposure-'+[guid]::NewGuid().ToString('N'))
 $saved = @{}
