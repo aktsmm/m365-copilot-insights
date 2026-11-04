@@ -61,34 +61,46 @@ department / month / metric totals from the reviewed public fixture. It strips
 user IDs, names and UPNs before the model reads `exports/measured-aggregate.json`.
 The original private source and live APIs are never model inputs.
 
-The model stages `commentary.json` through `upload_artifact`. The installed gh-aw
-compiler exposes it as the fixed `safe-outputs-upload-artifacts` artifact; this
-is the runtime contract verified on the cloud run, not an agent-chosen artifact name.
-The separate Pages workflow runs after successful inference, checks the originating
-repository / workflow / branch, bounded artifact size, strict keys and source digest,
-then HTML-escapes the short Japanese text. All numeric evidence is computed by
+The model requests `output/commentary.json` through `upload_artifact`. The installed
+gh-aw compiler first stages a root-relative `commentary.json` inside the one-day
+`safe-outputs-upload-artifacts` intermediate artifact; the handler then uploads the
+final artifact named `commentary.json`, with a seven-day retention setting. Pages
+never treats the intermediate artifact as a successful safe output.
+
+The separate Pages workflow runs after a successful inference run. It requires the
+final artifact from that run and attempt, checks its creation against the matching
+`safe_outputs` job, repository / workflow / branch, bounded size, strict keys and
+source digest, then HTML-escapes the short Japanese text. A successful workflow or
+handler step alone does not establish that the final artifact was created. All numeric evidence is computed by
 scripts; prose cannot contain numeric digits. Interpretation is labelled AI-generated,
 not an official report, individual assessment, or proof of adoption.
 The aggregate separates dates after the report refresh from expired unsaved gaps
 and still-retrievable gaps. Missing days include future-report dates; do not
 describe all of them as outages or promise that an expired month can be recovered.
 
-Manual Pages dispatch reuses the latest successful inference artifact. Before the
-first inference it explicitly shows no AI prose. Missing / expired artifacts,
-invalid JSON or a changed aggregate digest stop deployment instead of reusing stale
-text. After a public fixture update, rerun measured commentary before publishing.
-Artifacts retain seven days; rerun inference if they expire. Previously deployed
-Pages content remains until a successful replacement deployment.
+Manual Pages dispatch uses the latest successful inference run. Before the first
+inference it explicitly shows no AI prose. If that run's final artifact has expired,
+the workflow may reuse the previously deployed `commentary.json` only if its
+`commentary-provenance.json`, Pages manifest hashes, run, attempt and safe-output
+job match; the builder must also accept the current aggregate digest. A missing
+artifact before expiry, missing provenance, altered files, a new run without a
+final artifact, invalid JSON or a changed aggregate stops deployment. After a
+public fixture update, rerun measured commentary before publishing.
 
-The public page links to the aggregate input, AI JSON and inference run. Only the
+This reuse reads the fixed project Pages URL over HTTPS. The manifest and provenance
+are integrity cross-checks, not independent signatures: trust depends on GitHub
+Pages, TLS and the repository's authorized publishers. Previously deployed Pages
+content remains until a successful replacement deployment.
+
+The public page links to the aggregate input, AI JSON, provenance and inference run. Only the
 public aggregate artifact is downloaded; never download backend artifacts or logs.
 Source: https://github.github.com/gh-aw/reference/safe-outputs/#artifact-uploads-upload-artifact
 
-The first integration run produced valid inference but Pages refused publication:
-the current tool accepts a file path and did not create an agent-named artifact.
-The downloader now selects only the compiler's fixed artifact, checks its single
-root file, and rejects other output artifacts. Do not equate an overall inference
-run success with downstream publication success.
+The earlier integration run staged valid inference but its final handler rejected
+the configured `output/commentary.json` allowlist: the handler checks paths
+relative to the staging root. The allowlist now uses `commentary.json`; the Pages
+downloader requires the final artifact and rejects staging-only output. Do not equate
+an overall inference run success with downstream publication success.
 
 Private backend workflows require repository variables `TENANT_ID`,
 `COLLECTOR_CLIENT_ID`, `PUBLISHER_CLIENT_ID`, `SPO_SITE_ID`, `SPO_LIBRARY_ID`,

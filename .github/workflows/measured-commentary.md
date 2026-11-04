@@ -17,7 +17,7 @@ safe-outputs:
     retention-days: 7
     max-size-bytes: 16384
     allowed-paths:
-      - "output/commentary.json"
+      - "commentary.json"
 ---
 
 Read only `exports/measured-aggregate.json`. This is a deterministic aggregation of
@@ -50,9 +50,9 @@ be recovered. Recommend reacquisition only for gaps still inside the window,
 or continued collection of future reports; do not compare series even by coverage.
 Do not suggest reauthentication or changing permissions without evidence.
 
-Use the `upload_artifact` safe-output tool to upload `output/commentary.json`.
-The installed compiler stages it in the `safe-outputs-upload-artifacts` artifact;
-the tool's input is a path, not a configurable artifact name.
+Use the `upload_artifact` safe-output tool to upload `output/commentary.json`
+without setting an artifact name. The tool stages it as `commentary.json`; the
+safe-output handler must then publish the final artifact with that exact name.
 Do not end with noop if a valid
 input exists. If input is missing/invalid, report missing data instead of inventing
 an interpretation. A separate Pages workflow validates the artifact and input

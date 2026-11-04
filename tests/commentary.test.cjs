@@ -52,14 +52,22 @@ test('render separates computed evidence and AI text, escapes content and links 
   assert.match(html, /取得窓外の未保存日は復元できず/);
   assert.match(html, /基準日後を含む/);
   assert.match(html, /actions\/runs\/123/);
+  assert.match(html, /href="commentary-provenance\.json"/);
   assert.match(render(summary, null), /AI 解説がありません/);
   assert.throws(() => render(summary, value, '123?malicious'));
 });
-test('artifact reader follows the compiled runtime artifact contract, not an agent-selected name', () => {
+test('artifact reader uses the final safe-output artifact, never its staging artifact', () => {
   const reader = fs.readFileSync(path.join(__dirname, '../scripts/Get-CopilotCommentaryArtifact.ps1'), 'utf8');
+  const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/measured-commentary.md'), 'utf8');
   const compiled = fs.readFileSync(path.join(__dirname, '../.github/workflows/measured-commentary.lock.yml'), 'utf8');
-  assert.match(reader, /\$artifactName = 'safe-outputs-upload-artifacts'/);
+  assert.match(reader, /\$artifactName = 'commentary\.json'/);
+  assert.doesNotMatch(reader, /safe-outputs-upload-artifacts/);
+  assert.match(workflow, /allowed-paths:\s*\n\s*- "commentary\.json"/);
+  assert.match(workflow, /retention-days: 7/);
   assert.match(compiled, /name: safe-outputs-upload-artifacts/);
+  assert.match(compiled, /\\"allowed-paths\\":\[\\"commentary\.json\\"\]/);
+  assert.doesNotMatch(compiled, /\\"allowed-paths\\":\[\\"output\/commentary\.json\\"\]/);
   assert.match(reader, /files.Count -ne 1/);
   assert.match(reader, /head_repository.full_name -cne \$repo/);
+  assert.match(reader, /attempts\/\$\(\$run\.run_attempt\)\/jobs/);
 });

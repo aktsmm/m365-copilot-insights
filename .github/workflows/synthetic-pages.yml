@@ -27,6 +27,7 @@ jobs:
         run: |
           ./tests/Test-CopilotPipeline.ps1
           ./tests/Test-CopilotPublicExposure.ps1
+          ./tests/Test-CopilotCommentaryProvenance.ps1
           node --test ./tests/synthetic-pages.test.cjs ./tests/public-monthly.test.cjs ./tests/commentary.test.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Public monthly fixture tests failed' }
           ./tests/Test-CopilotSyntheticPages.ps1 -EvidenceDirectory "$env:RUNNER_TEMP/synthetic-reproducibility"
@@ -35,7 +36,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           COMMENTARY_RUN_ID: ${{ github.event.workflow_run.id }}
-        run: ./scripts/Get-CopilotCommentaryArtifact.ps1 -OutputDirectory "$env:RUNNER_TEMP/commentary" -RunId $env:COMMENTARY_RUN_ID
+          COMMENTARY_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: ./scripts/Get-CopilotCommentaryArtifact.ps1 -OutputDirectory "$env:RUNNER_TEMP/commentary" -RunId $env:COMMENTARY_RUN_ID -ExpectedRunAttempt $env:COMMENTARY_RUN_ATTEMPT
       - name: Build reviewed public-only measured export and independent synthetic fixtures
         shell: pwsh
         run: |
@@ -43,6 +45,7 @@ jobs:
           if (Test-Path "$env:RUNNER_TEMP/commentary/commentary.json") {
             $args.CommentaryPath = "$env:RUNNER_TEMP/commentary/commentary.json"
             $args.CommentaryRunId = Get-Content "$env:RUNNER_TEMP/commentary/run-id.txt" -Raw
+            $args.CommentaryProvenancePath = "$env:RUNNER_TEMP/commentary/provenance.json"
           }
           $result = ./scripts/Build-CopilotPublicPages.ps1 @args
           $manifest = Get-Content "$env:RUNNER_TEMP/synthetic-site/manifest.json" -Raw | ConvertFrom-Json

@@ -9,7 +9,8 @@
 param(
     [Parameter(Mandatory)][string]$OutputDirectory,
     [string]$CommentaryPath,
-    [string]$CommentaryRunId
+    [string]$CommentaryRunId,
+    [string]$CommentaryProvenancePath
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -57,9 +58,24 @@ $notice = @'
 $measuredPath = Join-Path $output 'measured-monthly.html'
 $html = Get-Content -LiteralPath $measuredPath -Raw -Encoding utf8
 $commentaryArgs = @('render', $payloadPath, (Join-Path $output 'commentary-section.html'))
-if ($CommentaryPath) { $commentaryArgs += @($CommentaryPath, $CommentaryRunId) }
+if ($CommentaryPath) {
+    if (-not $CommentaryRunId -or -not $CommentaryProvenancePath) { throw 'Commentary provenance is required.' }
+    Import-Module (Join-Path $PSScriptRoot 'Copilot.CommentaryProvenance.psm1') -Force
+    $commentaryBytes = [IO.File]::ReadAllBytes($CommentaryPath)
+    $provenanceBytes = [IO.File]::ReadAllBytes($CommentaryProvenancePath)
+    $provenance = ConvertFrom-CopilotJsonBytes $provenanceBytes
+    $null = Test-CopilotCommentaryProvenance -CommentaryBytes $commentaryBytes -Provenance $provenance `
+        -RunId $CommentaryRunId -RunAttempt ([int]$provenance.runAttempt)
+    $commentaryArgs += @($CommentaryPath, $CommentaryRunId)
+} elseif ($CommentaryRunId -or $CommentaryProvenancePath) {
+    throw 'Commentary provenance cannot be supplied without commentary.'
+}
 & $node (Join-Path $PSScriptRoot 'Copilot.Commentary.cjs') @commentaryArgs
 if ($LASTEXITCODE -ne 0) { throw 'AI commentary contract failed; refusing publication.' }
+if ($CommentaryPath) {
+    [IO.File]::WriteAllBytes((Join-Path $output 'commentary.json'), $commentaryBytes)
+    [IO.File]::WriteAllBytes((Join-Path $output 'commentary-provenance.json'), $provenanceBytes)
+}
 $commentarySection = Get-Content -LiteralPath (Join-Path $output 'commentary-section.html') -Raw -Encoding utf8
 $initialView = '<script>(() => { const view = document.querySelector(''select[id$="-view"]''); if (view) { view.value = "unknown"; view.dispatchEvent(new Event("change", { bubbles: true })); } })();</script>'
 $html = $html.Replace('<main id="dashboard">', "$(Set-NavCurrent $nav 'index.html')$notice$commentarySection<main id=`"dashboard`">").Replace('</body>', "$initialView</body>")
@@ -83,7 +99,7 @@ $archBody = @"
 <li><b>匿名化・検証</b>: 非公開側でUPNのドメインを隠し（氏名・部署名は架空の人物の実データ）、GUID・ドメイン・URLを除いたうえで、契約（スキーマ）と固定ハッシュで検証します。unknown（欠測）は0に置き換えません。</li>
 <li><b>公開</b>: 検証済みの公開用JSONから静的HTMLをビルドします。秘密情報・元IDは除去し、架空のデモ人物の氏名と部署名は公開します。SharePointリンクは要認証で、リンクによる権限付与はありません。</li>
 <li><b>社内閲覧</b>: 同じ集計をSharePoint上のSPFx Webパーツ（日本語既定）とCSVダウンロードで提供します。</li>
-<li><b>解説</b>: 手動起動のMeasured aggregate commentaryが、公開承認済みデータの部門別集計だけを読み、AI解説JSONをActions artifactへ出します。成功するとPagesが自動起動し、集計の識別子・出力契約を検査してトップページに掲載します。未生成時はその旨を表示し、古いデータ向けの解説は拒否します。</li>
+<li><b>解説</b>: 手動起動のMeasured aggregate commentaryが、公開承認済みデータの部門別集計だけを読みます。Pagesは正式な安全出力と推論run・集計識別子・出力契約を検査し、成功した場合だけ掲載します。正式成果物の期限後は同じrun・attempt・集計の検査済み公開コピーだけを再利用し、新しい推論の保存失敗や古いデータ向けの解説は拒否します。</li>
 <li><b>障害記録</b>: 月次収集・監査集計の失敗やタイムアウトでIssueを自動作成・追記します。ジョブ名・ステップ名・実行URLだけを記録し、ログ本文の収集やAIによる原因確定・修復はしません。</li>
 </ol>
 <h2 id="sources">データ元と原本リンク</h2>

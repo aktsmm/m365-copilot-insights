@@ -19,7 +19,7 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 | 2 | 部門別 CSV/HTML を SharePoint の専用サイトへ保存（上書きせず、履歴を保持） | 検証済み |
 | 3 | 公開 Pages に、公開用に加工したデータだけを静的に公開 | 検証済み（更新は手動。ライブから公開への自動更新はない） |
 | 4 | SharePoint ページ用 SPFx Web パーツ | アプリカタログ登録・デプロイ・専用サイトへのインストールまで完了。一般ユーザーでの閲覧確認は未実施 |
-| 5 | Agentic Workflow による解説生成 | `Measured aggregate commentary` は公開承認済みの実測値の部門別集計のみを読む。GitHub 上で手動起動し、出力 JSON の検査後に Pages を自動配備する。氏名・個票やライブ原本は読ませない。元の合成用ワークフローは別の noop デモ |
+| 5 | Agentic Workflow による解説生成 | `Measured aggregate commentary` は公開承認済みの実測値の部門別集計のみを読む。GitHub 上で手動起動し、正式な安全出力と集計識別子の検査後に Pages を自動配備する。保存失敗時は公開を止める。氏名・個票やライブ原本は読ませない。元の合成用ワークフローは別の noop デモ |
 | 6 | Purview 監査ログの集計（Copilot の操作を日・アプリ・エージェント名で件数集計。ユーザー名は出さない） | 専用アプリ・OIDC で毎日 1 回に設定。名前が取れる場合、公開ログには `Researcher`・`Analyst`・`Planner Agent` のみ表示し、他は「その他」にまとめる。名前が未記録の場合は「(なし)」とする |
 | 7 | Viva Insights の Copilot / エージェント / 消費量ダッシュボード | 表示と CSV のブラウザ取得を確認。GitHub 単体の無人取得は未達。高度分析 → Fabric 定期更新の公式経路はあるが、本テナントでは分析結果ページに到達できず未接続 |
 | 8 | デモ用の利用実績づくり（TAP と CDP の画面操作） | 動作する。人が操作する補助で、定期実行や無人運用の対象ではない（[docs/demo-usage-seeding.md](docs/demo-usage-seeding.md)） |
@@ -38,6 +38,8 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 失敗時は、公開の実行ログに許可された段階名（例: `"failedStage":"probe"`）を出し、別の通常 Actions が失敗 Issue を記録します。Issue にログ本文や個人データは転記しません。詳しい手順は [docs/operations-notes.md](docs/operations-notes.md) を参照してください。
 
 **収集するスクリプトと、解釈する AI は別工程です。** Graph の CSV 応答も Actions がブラウザなしで直接取得します。AI は公開用の集計 JSON に短い参考解説を付けるだけで、Viva の取得や欠測の補完はしません。取得元と表示先は [データ対応表](docs/data-sources.md)、解説の契約と起動方法は [運用メモ](docs/operations-notes.md#measured-aggregate-commentary) を参照してください。
+
+AI 解説の正式成果物は 7 日保持します。期限後に Pages を手動更新する場合は、以前に公開した検査済み解説と出典を、同じ推論 run・attempt・集計に一致する場合だけ再利用します。新しい推論が保存に失敗した場合や、公開データが変わった場合は古い解説で代用せず配備を止めます。
 
 ## 見方の約束
 
@@ -69,6 +71,7 @@ PowerShell 7.5 以上、Node.js、Git が必要です。
 ```powershell
 & .\tests\Test-CopilotPipeline.ps1
 & .\tests\Test-CopilotPublicExposure.ps1
+& .\tests\Test-CopilotCommentaryProvenance.ps1
 node --test .\tests\synthetic-pages.test.cjs .\tests\public-monthly.test.cjs .\tests\commentary.test.cjs
 ```
 
