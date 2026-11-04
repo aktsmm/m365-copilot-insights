@@ -117,7 +117,7 @@ $archBody = @"
 <tr><td>4</td><td>Viva Insights Copilot / エージェントダッシュボード</td><td>ログイン済みブラウザからCSVをエクスポート。公開APIでの取得は確認できていない</td><td>画面操作で取得済み。GitHubだけの無人取得は未実装。この月次グラフには含めない</td></tr>
 <tr><td>5</td><td>Viva Insights 高度分析（Analysis results）</td><td>公式にFabric Dataflow Gen2の定期更新とCopy jobがある（Partition ID・Query ID・容量が必要）</td><td>本テナントは11/4も分析結果ページに到達不可。未接続・追加費用未承認。クラウド自動化そのものが不可能という意味ではない</td></tr>
 <tr><td>6</td><td>Purview監査ログ</td><td>Graph auditLog queriesを専用アプリのOIDCで取得し、日・アプリ・エージェント別に件数と利用者数を集計</td><td>毎日03:30 JSTに定期設定。公開ログはResearcher・Analyst・Planner Agentのみ表示し、他の名前は「その他」、未記録は別扱い。Vivaのセッション数とは別で、この月次グラフには含めない</td></tr>
-<tr><td>7</td><td>M365メッセージセンター</td><td>本リポジトリには収集処理なし</td><td>取得・表示していない。Graphの利用レポートやVivaの別名ではない</td></tr>
+<tr><td>7</td><td>M365メッセージセンター</td><td>本リポジトリでは対象外。<a href="https://github.com/aktsmm/m365-message-center-dashboard">別プロジェクト</a>がGraphと通常のGitHub Actionsで定期収集</td><td><a href="https://aktsmm.github.io/m365-message-center-dashboard/">別の通知ページ</a>へ公開。AI要約は別工程。この月次グラフには含めない</td></tr>
 </tbody></table>
 <p>詳細と公式リンク: <a href="https://github.com/aktsmm/m365-copilot-insights/blob/main/docs/data-sources.md">画面ごとのデータ取得方式（docs/data-sources.md）</a></p>
 <h2>自動化の境界</h2>

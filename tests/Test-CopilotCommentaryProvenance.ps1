@@ -228,6 +228,9 @@ try {
     $site = Join-Path $work 'site'
     & $builder -OutputDirectory $site -CommentaryPath $inputPath -CommentaryRunId $runId `
         -CommentaryProvenancePath $proofPath | Out-Null
+    $architecture = Get-Content -LiteralPath (Join-Path $site 'architecture.html') -Raw -Encoding utf8
+    Assert-Condition ($architecture.Contains('https://aktsmm.github.io/m365-message-center-dashboard/') -and
+        $architecture.Contains('この月次グラフには含めない')) 'separate Message Center source is linked without implying merged metrics'
     Assert-Condition ((Get-CopilotBytesSha256 ([IO.File]::ReadAllBytes((Join-Path $site 'commentary.json')))) -ceq `
         $realProof.commentarySha256) 'published commentary preserves final artifact bytes'
     $script:publicFiles = @{

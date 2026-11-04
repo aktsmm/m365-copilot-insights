@@ -18,7 +18,7 @@
 | 9 | Viva の Copilot / エージェント CSV | Viva Insights のログイン済み画面のエクスポート | ブラウザ操作で取得済み。GitHub 単体の無人取得は未実装。月次 Pages の値には加えない |
 | 10 | AI 解説 | 公開用実測値を部門・月・指標別に決定論的に集計した `measured-aggregate.json` | 手動起動の `measured-commentary` が集計だけを読み、正式な安全出力と集計の一致を検査後に Pages が自動配備。氏名・UPN・個票・ライブ原本を AI 入力にしない |
 | 11 | 障害 Issue | Actions API の実行結果とワークフロー定義済みのジョブ名・ステップ名 | 失敗 / タイムアウトで自動記録。ログ本文や Graph 応答は読まない。原因究明・自動修復は別作業 |
-| 12 | M365 メッセージセンターの通知 | 本リポジトリには収集処理なし | 取得・表示していない。管理センターの利用状況レポートとは異なる |
+| 12 | M365 メッセージセンターの通知 | 本リポジトリには収集処理なし。[別プロジェクト](https://github.com/aktsmm/m365-message-center-dashboard)では Graph と通常の GitHub Actions で定期収集 | [別の通知ページ](https://aktsmm.github.io/m365-message-center-dashboard/)に公開。AI 要約は別工程。管理センターの利用状況レポートとは異なり、この月次ページには含めない |
 
 「Copilot アクション」は各アプリでの Copilot 操作を表す指標、
 「プロンプト」は Copilot に送信した質問の指標です。両者の厳密な換算関係は確認できていません。

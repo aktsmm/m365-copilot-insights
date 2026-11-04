@@ -8,6 +8,7 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 - 自分のテナントで動かす手順（**前提条件チェックリストと必要な権限を含む**）: [docs/setup-guide.md](docs/setup-guide.md)
 - エージェントにセットアップを任せる手順（環境変数・依頼文つき）: [docs/agent-setup.md](docs/agent-setup.md)
 - M365 / Viva Insights の画面ごとのデータ取得方式: [docs/data-sources.md](docs/data-sources.md)（公開ページ: [仕組みとデータ元](https://aktsmm.github.io/m365-copilot-insights/architecture.html#portal-map)）
+- メッセージセンターの通知は別プロジェクトの [Microsoft 365 Change Radar](https://aktsmm.github.io/m365-message-center-dashboard/) で公開しています。利用状況とは別データで、このダッシュボードには取り込みません。
 - デモ用の利用実績を作る手順（任意・自分のデモテナントのみ）: [docs/demo-usage-seeding.md](docs/demo-usage-seeding.md)
 - 運用メモ（詳細・英語）: [docs/operations-notes.md](docs/operations-notes.md)
 
@@ -32,12 +33,14 @@ Microsoft 365 Copilot の利用状況（Graph の Copilot 利用レポート）�
 | 1 | 無人で動く | Graph の日別利用（アクション数／プロンプト数）の取得と履歴の蓄積（毎日 06:00 と 18:00 JST）、暦月の集計、SharePoint への保存、Purview 監査ログの件数集計（毎日 03:30 JST）、公開前の検査 |
 | 2 | GitHub 上で手動起動する | 公開 Pages の更新、OIDC の確認、ライブ取得（`live-validation.yml`）、実測集計の Agentic 解説。解説の成功後は Pages が自動起動する。ローカル操作は不要 |
 | 3 | 有人の画面操作が必要 | Viva Insights のダッシュボードの CSV エクスポート、デモ利用実績づくり、SharePoint Home のリンク追加などの画面設定 |
-| 4 | この実装では未達 | Viva や管理センターのエージェント利用指標の無人取得（監査ログの件数集計とは別）、完全な暦月のプロンプト数（日別 API の窓外・504 は欠測）、Viva 高度分析（Power BI / Fabric）の無人取得、一般ユーザーでの SPFx 閲覧確認。M365 メッセージセンターの通知は取得・表示していない |
+| 4 | この実装では未達 | Viva や管理センターのエージェント利用指標の無人取得（監査ログの件数集計とは別）、完全な暦月のプロンプト数（日別 API の窓外・504 は欠測）、Viva 高度分析（Power BI / Fabric）の無人取得、一般ユーザーでの SPFx 閲覧確認。M365 メッセージセンターの通知は本リポジトリには含めない |
 | 5 | 既知の制約 | 日別 API は報告日の 7 日前から報告日までしか取れない。Graph の利用状況レポートは 504 を返すことがあり、取れない日は「不明」として残す（0 にしない）。応答形式が JSON から CSV に変わった事例がある |
 
 失敗時は、公開の実行ログに許可された段階名（例: `"failedStage":"probe"`）を出し、別の通常 Actions が失敗 Issue を記録します。Issue にログ本文や個人データは転記しません。詳しい手順は [docs/operations-notes.md](docs/operations-notes.md) を参照してください。
 
 **収集するスクリプトと、解釈する AI は別工程です。** Graph の CSV 応答も Actions がブラウザなしで直接取得します。AI は公開用の集計 JSON に短い参考解説を付けるだけで、Viva の取得や欠測の補完はしません。取得元と表示先は [データ対応表](docs/data-sources.md)、解説の契約と起動方法は [運用メモ](docs/operations-notes.md#measured-aggregate-commentary) を参照してください。
+
+メッセージセンター通知は[別のプロジェクト](https://github.com/aktsmm/m365-message-center-dashboard)が Graph と通常の GitHub Actions で定期収集し、Agentic Workflow が別工程で要約します。通知の公開範囲もそのプロジェクトで管理します。
 
 AI 解説の正式成果物は 7 日保持します。期限後に Pages を手動更新する場合は、以前に公開した検査済み解説と出典を、同じ推論 run・attempt・集計に一致する場合だけ再利用します。新しい推論が保存に失敗した場合や、公開データが変わった場合は古い解説で代用せず配備を止めます。
 
