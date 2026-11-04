@@ -75,7 +75,9 @@ foreach ($offset in -7..0) {
     $date = $refresh.AddDays($offset).ToString('yyyy-MM-dd')
     $reply = Invoke-CopilotGraph -Uri "https://graph.microsoft.com/beta/copilot/reports/getMicrosoft365CopilotUsageUserDetailByDate(date=$date)" -Token $token -AllowError
     $probe = @{ date = $date; status = $reply.Status; errorCode = $reply.ErrorCode }
-    if ($reply.Status -eq 200) {
+    # A 200 reply with a non-JSON body (the service has returned CSV) is treated as an unavailable day, never as zero.
+    if ($reply.Status -eq 200 -and -not "$($reply.Text)".TrimStart().StartsWith('{')) { $probe.status = 0; $probe.errorCode = 'non-json-body' }
+    elseif ($reply.Status -eq 200) {
         $daily = $reply.Text | ConvertFrom-Json -AsHashtable
         [IO.File]::WriteAllText((Join-Path $output "raw-$date.json"), $reply.Text, $utf8)
         $seen = @{}
