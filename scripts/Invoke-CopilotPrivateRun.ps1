@@ -4,6 +4,7 @@ param([Parameter(Mandatory)][ValidateSet('live','calendar')][string]$Mode)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $status = 'failed'
+$failedStage = $null
 $work = $null
 $process = $null
 try {
@@ -39,12 +40,17 @@ try {
     # Drain both OS streams, including native stdout/stderr and formatted errors.
     # Nothing from the private process is forwarded to the public runner.
     $process = [Diagnostics.Process]::Start($start)
-    $stdout = $process.StandardOutput.BaseStream.CopyToAsync([IO.Stream]::Null)
+    $stdout = $process.StandardOutput.ReadToEndAsync()
     $stderr = $process.StandardError.BaseStream.CopyToAsync([IO.Stream]::Null)
     $process.WaitForExit()
-    [void]$stdout.GetAwaiter().GetResult()
+    $stdoutText = $stdout.GetAwaiter().GetResult()
     [void]$stderr.GetAwaiter().GetResult()
-    if ($process.ExitCode -ne 0) { throw 'Private processing failed' }
+    if ($process.ExitCode -ne 0) {
+        # Only an allowlisted stage name leaves the private process; no message or data is forwarded.
+        $marker = [regex]::Match("$stdoutText", '(?m)^STAGE_FAILED:(start|probe|restore|build|dashboard|publish|collect|observe|publish-observation|build-dashboard|publish-departments)\r?$')
+        if ($marker.Success) { $failedStage = $marker.Groups[1].Value }
+        throw 'Private processing failed'
+    }
     $status = 'succeeded'
 } catch {
     $status = 'failed'
@@ -55,5 +61,7 @@ try {
         catch { $status = 'failed' }
     }
 }
-[Console]::Out.WriteLine((@{schemaVersion=1;operation=$Mode;status=$status;privateOutputPublished=$false} | ConvertTo-Json -Compress))
+$publicStatus = [ordered]@{schemaVersion=1;operation=$Mode;status=$status;privateOutputPublished=$false}
+if ($status -ne 'succeeded' -and $failedStage) { $publicStatus.failedStage = $failedStage }
+[Console]::Out.WriteLine(($publicStatus | ConvertTo-Json -Compress))
 if ($status -ne 'succeeded') { exit 1 }

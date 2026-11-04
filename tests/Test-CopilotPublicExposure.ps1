@@ -139,7 +139,7 @@ if ($name -eq 'Get-CopilotCalendarProbe') {
             Assert (($exitCode -eq 0) -eq ($phase -eq 'success')) 'Private failure was converted into success'
             Assert ($errorText.Length -eq 0 -and $text -notmatch 'private-person|response-body|token-sentinel|tenant-guid|sharepoint|RUNNER_TEMP') 'Private stdout/stderr escaped'
             $result = $text | ConvertFrom-Json -AsHashtable
-            Assert ($result.status -ceq $expected -and $result.operation -ceq $mode -and -not $result.privateOutputPublished -and $result.Count -eq 4) 'Public status is not bounded'
+            Assert ($result.status -ceq $expected -and $result.operation -ceq $mode -and -not $result.privateOutputPublished -and ($result.Count -eq 4 -or ($result.Count -eq 5 -and $expected -ceq 'failed' -and $result.failedStage -cmatch '^(start|probe|restore|build|dashboard|publish|collect|observe|publish-observation|build-dashboard|publish-departments)$'))) 'Public status is not bounded'
             Assert (@(Get-ChildItem -LiteralPath $work -Directory -Filter 'copilot-private-*').Count -eq 0) 'Private runner files survived cleanup'
             foreach ($name in @('GITHUB_STEP_SUMMARY','GITHUB_OUTPUT','GITHUB_ENV','GITHUB_PATH','GITHUB_STATE')) {
                 Assert ((Get-Content -LiteralPath ([Environment]::GetEnvironmentVariable($name)) -Raw) -ceq 'preserved') 'Private process modified public workflow output'
