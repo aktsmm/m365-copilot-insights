@@ -231,6 +231,10 @@ try {
     $architecture = Get-Content -LiteralPath (Join-Path $site 'architecture.html') -Raw -Encoding utf8
     Assert-Condition ($architecture.Contains('https://aktsmm.github.io/m365-message-center-dashboard/') -and
         $architecture.Contains('この月次グラフには含めない')) 'separate Message Center source is linked without implying merged metrics'
+    $sourcesTable = [regex]::Match($architecture, '(?s)<table>.*?</table>').Value
+    $sourceNumbers = @([regex]::Matches($sourcesTable, '<tr><td>(\d+)</td>') |
+        ForEach-Object { $_.Groups[1].Value })
+    Assert-Condition (($sourceNumbers -join ',') -ceq '1,2,3,4') 'public source table numbers are consecutive'
     Assert-Condition ((Get-CopilotBytesSha256 ([IO.File]::ReadAllBytes((Join-Path $site 'commentary.json')))) -ceq `
         $realProof.commentarySha256) 'published commentary preserves final artifact bytes'
     $script:publicFiles = @{
