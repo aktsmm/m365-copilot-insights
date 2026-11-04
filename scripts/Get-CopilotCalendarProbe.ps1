@@ -40,7 +40,17 @@ if ($users.ContainsKey('@odata.nextLink')) { throw 'Directory pagination needs e
 [IO.File]::WriteAllText((Join-Path $output 'users.json'), $directory.Text, $utf8)
 $index = @{}
 foreach ($user in $users.value) { $index[$user.userPrincipalName.ToLowerInvariant()] = $user }
-$report = Invoke-CopilotGraph -Uri "https://graph.microsoft.com/v1.0/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D28')" -Token $token
+# The D28 stable report intermittently returns 504 for minutes; retry with backoff, then fall back to the D7 roster.
+$report = $null
+$rosterPeriod = 'D28'
+for ($try = 0; $try -lt 4 -and -not $report; $try++) {
+    $reply = Invoke-CopilotGraph -Uri "https://graph.microsoft.com/v1.0/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D28')" -Token $token -AllowError
+    if ($reply.Status -eq 200) { $report = $reply } else { Start-Sleep -Seconds (15 * ($try + 1)) }
+}
+if (-not $report) {
+    $rosterPeriod = 'D7'
+    $report = Invoke-CopilotGraph -Uri "https://graph.microsoft.com/v1.0/copilot/reports/getMicrosoft365CopilotUsageUserDetail(period='D7')" -Token $token
+}
 $rows = @($report.Text | ConvertFrom-Csv)
 $dates = @($rows | ForEach-Object { $_.'Report Refresh Date' } | Sort-Object -Unique)
 if ($rows.Count -eq 0 -or $dates.Count -ne 1) { throw 'Expected a nonempty stable report with one refresh date.' }
@@ -56,7 +66,7 @@ $summary = @{
     capturedAt = [DateTime]::UtcNow.ToString('o')
     source = 'graph-beta-usage-by-date'; delegatedProbe = (-not $UseActions)
     runtimeApplicationVerified = [bool]$UseActions
-    stableRows = $rows.Count; reportRefreshDate = $refresh.ToString('yyyy-MM-dd')
+    rosterPeriod = $rosterPeriod; stableRows = $rows.Count; reportRefreshDate = $refresh.ToString('yyyy-MM-dd')
     allAppsPromptMetricAvailable = $false
     reason = '日別APIの全アプリ指標はactions。stableの送信プロンプト数とは異なるため暦月プロンプトとして代用しない。'
     days = @()
