@@ -3,6 +3,11 @@
 param([Parameter(Mandatory)][ValidateSet('live','calendar')][string]$Mode)
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+function Get-CalendarMonths([string]$RefreshDate) {
+    # Include the previous month so a month rollover keeps the finished month current and never leaves the new month without snapshots.
+    $d = [datetime]::ParseExact($RefreshDate, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture)
+    @($d.AddMonths(-1).ToString('yyyy-MM'), $d.ToString('yyyy-MM')) | Where-Object { $_ -ge '2026-10' }
+}
 $common = @{
     TenantId=$env:TENANT_ID; PublisherClientId=$env:PUBLISHER_CLIENT_ID
     SiteId=$env:SPO_SITE_ID; LibraryId=$env:SPO_LIBRARY_ID
@@ -11,7 +16,7 @@ if ($Mode -eq 'calendar') {
     & (Join-Path $PSScriptRoot 'Get-CopilotCalendarProbe.ps1') -TenantId $env:TENANT_ID -CollectorClientId $env:COLLECTOR_CLIENT_ID -UseActions -OutputDirectory (Join-Path $env:RUNNER_TEMP 'calendar-probe')
     & (Join-Path $PSScriptRoot 'Restore-CopilotHistory.ps1') @common -ArtifactDirectory $env:RUNNER_TEMP
     $summary = Get-Content (Join-Path $env:RUNNER_TEMP 'calendar-probe\probe-summary.json') -Raw | ConvertFrom-Json
-    & (Join-Path $PSScriptRoot 'Build-CopilotMonthly.ps1') -SnapshotsPath (Join-Path $env:RUNNER_TEMP 'calendar-combined-snapshots') -Months @($summary.reportRefreshDate.Substring(0,7)) -OutputDirectory (Join-Path $env:RUNNER_TEMP 'calendar-monthly')
+    & (Join-Path $PSScriptRoot 'Build-CopilotMonthly.ps1') -SnapshotsPath (Join-Path $env:RUNNER_TEMP 'calendar-combined-snapshots') -Months @(Get-CalendarMonths $summary.reportRefreshDate) -OutputDirectory (Join-Path $env:RUNNER_TEMP 'calendar-monthly')
     & (Join-Path $PSScriptRoot 'Export-CopilotMonthlyDashboard.ps1') -PayloadPath (Join-Path $env:RUNNER_TEMP 'calendar-monthly\monthly.json') -OutputPath (Join-Path $env:RUNNER_TEMP 'calendar-monthly\monthly-dashboard.html') -DataClass tenant -ShowObservedCounts
     & (Join-Path $PSScriptRoot 'Publish-CopilotMonthly.ps1') @common -ArtifactDirectory $env:RUNNER_TEMP -OutputPath (Join-Path $env:RUNNER_TEMP 'calendar-publication\result.json') -PublishCurrentMetadata -Apply
 } else {
